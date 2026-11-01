@@ -39,9 +39,7 @@
                         {{ $navigationCategory->name }}
                     </a>
                 @endforeach
-                <a href="{{ route('contact') }}" class="hover:text-amber-700" @if (request()->routeIs('contact')) aria-current="page" @endif>Contact</a>
-                <a href="{{ url('/admin/login') }}" class="rounded-full border border-stone-300 px-4 py-2 text-stone-800 hover:border-amber-600 hover:text-amber-700">Admin</a>
-            </nav>
+                <a href="{{ route('contact') }}" class="hover:text-amber-700" @if (request()->routeIs('contact')) aria-current="page" @endif>Contact</a>            </nav>
             <form action="{{ route('search') }}" method="GET" role="search" class="flex w-full gap-2 sm:ml-auto sm:w-auto">
                 <label for="site-search" class="sr-only">Search stories</label>
                 <input id="site-search" type="search" name="q" value="{{ request('q') }}" maxlength="100" placeholder="Search stories" required class="min-w-0 flex-1 rounded-full border border-stone-300 px-4 py-2 text-sm focus:border-amber-600 focus:outline-none sm:w-48">

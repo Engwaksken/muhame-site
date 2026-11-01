@@ -33,6 +33,12 @@ class PagesAndContactTest extends TestCase
         $this->get('/does-not-exist')->assertNotFound();
     }
 
+    public function test_public_site_does_not_link_to_the_admin_panel(): void
+    {
+        $this->get('/')->assertOk()->assertDontSee('/admin', false);
+        $this->get('/contact')->assertOk()->assertDontSee('/admin', false);
+    }
+
     public function test_page_routes_do_not_shadow_reserved_paths(): void
     {
         $this->get('/admin')->assertRedirect('/admin/login');
