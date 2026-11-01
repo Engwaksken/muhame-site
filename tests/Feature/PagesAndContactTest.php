@@ -82,6 +82,44 @@ class PagesAndContactTest extends TestCase
             ->assertDontSee('draft-page');
     }
 
+    public function test_contact_page_shows_details_grid_map_and_social_with_font_awesome_icons(): void
+    {
+        SiteSetting::current()->update([
+            'contact_email' => 'hello@muhame.test',
+            'contact_phone' => '+256 (700) 123-456',
+            'contact_address' => "Plot 12, Example Road\nKampala",
+            'office_hours' => 'Mon – Fri: 8:00 – 17:00',
+            'map_location' => 'Kampala, Uganda',
+            'social_links' => ['LinkedIn' => 'https://linkedin.com/company/muhame', 'Facebook' => 'https://facebook.com/muhame'],
+        ]);
+
+        $this->get('/contact')->assertOk()
+            ->assertSee('fas fa-envelope', false)->assertSee('href="mailto:hello@muhame.test"', false)
+            ->assertSee('fas fa-phone', false)->assertSee('href="tel:+256700123456"', false)
+            ->assertSee('fas fa-location-dot', false)->assertSee('Plot 12, Example Road')
+            ->assertSee('fas fa-clock', false)->assertSee('Mon – Fri: 8:00 – 17:00')
+            ->assertSee('src="https://www.google.com/maps?q=Kampala%2C%20Uganda&amp;output=embed"', false)
+            ->assertSee('https://www.google.com/maps/dir/?api=1&amp;destination=Kampala%2C%20Uganda', false)
+            ->assertSee('fab fa-linkedin-in', false)->assertSee('fab fa-facebook-f', false)
+            ->assertSee('fas fa-paper-plane', false);
+    }
+
+    public function test_contact_page_hides_empty_details_and_map(): void
+    {
+        $this->get('/contact')->assertOk()
+            ->assertSee('Send us a message')
+            ->assertDontSee('aria-label="Contact details"', false)
+            ->assertDontSee('<iframe', false)
+            ->assertDontSee('Get directions');
+    }
+
+    public function test_map_location_is_url_encoded_so_it_cannot_break_out_of_the_iframe(): void
+    {
+        SiteSetting::current()->update(['map_location' => '"><script>alert(1)</script>']);
+
+        $this->get('/contact')->assertOk()->assertDontSee('<script>alert(1)', false)->assertSee('%22%3E%3Cscript%3E', false);
+    }
+
     public function test_contact_form_stores_message_and_emails_site_contact(): void
     {
         Mail::fake();

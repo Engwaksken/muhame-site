@@ -1,5 +1,10 @@
 import './bootstrap';
 
+// Font Awesome Free (solid + brand icons), bundled locally: use e.g. <i class="fas fa-envelope"></i>.
+import '@fortawesome/fontawesome-free/css/fontawesome.min.css';
+import '@fortawesome/fontawesome-free/css/solid.min.css';
+import '@fortawesome/fontawesome-free/css/brands.min.css';
+
 // Header menus: [data-toggle="<id>"] buttons show/hide the element with that id.
 // Without JavaScript, dropdowns still open on hover/focus via CSS and the
 // mobile menu falls back to a plain list.

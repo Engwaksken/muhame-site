@@ -1,6 +1,14 @@
 {
+  "node_modules/@fortawesome/fontawesome-free/webfonts/fa-brands-400.woff2": {
+    "file": "assets/fa-brands-400-Bs6tcqqs.woff2",
+    "src": "node_modules/@fortawesome/fontawesome-free/webfonts/fa-brands-400.woff2"
+  },
+  "node_modules/@fortawesome/fontawesome-free/webfonts/fa-solid-900.woff2": {
+    "file": "assets/fa-solid-900-IAB4Droh.woff2",
+    "src": "node_modules/@fortawesome/fontawesome-free/webfonts/fa-solid-900.woff2"
+  },
   "resources/css/app.css": {
-    "file": "assets/app-DHMbn-R5.css",
+    "file": "assets/app-CBWXBTTK.css",
     "src": "resources/css/app.css",
     "isEntry": true,
     "name": "app",
@@ -9,9 +17,16 @@
     ]
   },
   "resources/js/app.js": {
-    "file": "assets/app-CKvvw7LQ.js",
+    "file": "assets/app-DJyzzHK3.js",
     "name": "app",
     "src": "resources/js/app.js",
-    "isEntry": true
+    "isEntry": true,
+    "css": [
+      "assets/app-BrIQGN8O.css"
+    ],
+    "assets": [
+      "assets/fa-solid-900-IAB4Droh.woff2",
+      "assets/fa-brands-400-Bs6tcqqs.woff2"
+    ]
   }
 }

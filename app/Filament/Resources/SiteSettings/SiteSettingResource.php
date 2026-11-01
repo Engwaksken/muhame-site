@@ -66,14 +66,25 @@ class SiteSettingResource extends Resource
                     Tab::make('General')->icon(Heroicon::OutlinedHome)->columns(2)->schema([
                         TextInput::make('site_name')->required()->maxLength(100),
                         TextInput::make('tagline')->maxLength(180)->helperText('Shown in the footer and search results.'),
-                        TextInput::make('contact_email')->email()->maxLength(255)
-                            ->helperText('Contact form messages are sent here, and it is shown in the footer.'),
                         Section::make('Homepage fallback')->columnSpanFull()->collapsed()
                             ->description('Only used when no page is published as the homepage. The homepage then lists the latest insights.')
                             ->schema([
                                 TextInput::make('homepage_title')->required()->maxLength(160),
                                 Textarea::make('homepage_description')->maxLength(300)->rows(2),
                             ]),
+                    ]),
+
+                    Tab::make('Contact & map')->icon(Heroicon::OutlinedMapPin)->columns(2)->schema([
+                        TextInput::make('contact_email')->label('Email')->email()->maxLength(255)
+                            ->helperText('Contact form messages are sent here. Also shown on the contact page and in the footer.'),
+                        TextInput::make('contact_phone')->label('Phone')->tel()->maxLength(40)->placeholder('+256 700 000 000'),
+                        Textarea::make('contact_address')->label('Address')->rows(3)->maxLength(500)
+                            ->placeholder("Plot 12, Example Road\nKampala, Uganda"),
+                        Textarea::make('office_hours')->label('Opening hours')->rows(3)->maxLength(300)
+                            ->placeholder("Mon – Fri: 8:00 – 17:00\nSat: 9:00 – 13:00"),
+                        TextInput::make('map_location')->label('Map location')->maxLength(255)->columnSpanFull()
+                            ->placeholder('Muhame, Kampala, Uganda   or   0.3476,32.5825')
+                            ->helperText('An address or place name, or latitude,longitude. Shows a Google map with a "Get directions" link on the contact page. Leave empty to hide the map.'),
                     ]),
 
                     Tab::make('Branding')->icon(Heroicon::OutlinedSwatch)->schema([

@@ -11,6 +11,7 @@ use Illuminate\Database\Eloquent\Model;
     'site_name', 'tagline', 'homepage_title', 'homepage_description', 'contact_email', 'logo_path',
     'navigation_links', 'social_links', 'primary_color', 'accent_color', 'footer_text', 'footer_links',
     'newsletter_heading', 'newsletter_text', 'favicon_path', 'body_font', 'heading_font', 'base_font_size',
+    'contact_phone', 'contact_address', 'office_hours', 'map_location',
 ])]
 class SiteSetting extends Model
 {
@@ -144,6 +145,46 @@ class SiteSetting extends Model
     public function faviconUrl(): string
     {
         return Media::url($this->favicon_path) ?? asset('favicon.ico');
+    }
+
+    /** "tel:" link for the phone number (digits and a leading + only), or null. */
+    public function phoneLink(): ?string
+    {
+        $digits = preg_replace('/(?!^\+)[^0-9]/', '', trim((string) $this->contact_phone));
+
+        return strlen(ltrim($digits, '+')) >= 5 ? 'tel:'.$digits : null;
+    }
+
+    /** Google Maps embed for the map location (an address or "lat,lng"), or null. No API key needed. */
+    public function mapEmbedUrl(): ?string
+    {
+        return filled($this->map_location)
+            ? 'https://www.google.com/maps?q='.rawurlencode(trim($this->map_location)).'&output=embed'
+            : null;
+    }
+
+    public function mapDirectionsUrl(): ?string
+    {
+        return filled($this->map_location)
+            ? 'https://www.google.com/maps/dir/?api=1&destination='.rawurlencode(trim($this->map_location))
+            : null;
+    }
+
+    /** Font Awesome brand icon for a social network name, e.g. "LinkedIn" => "fab fa-linkedin-in". */
+    public static function socialIcon(string $network): string
+    {
+        $key = strtolower(preg_replace('/[^a-z]/i', '', $network));
+
+        return match (true) {
+            str_contains($key, 'facebook') => 'fab fa-facebook-f',
+            $key === 'x' || str_contains($key, 'twitter') => 'fab fa-x-twitter',
+            str_contains($key, 'linkedin') => 'fab fa-linkedin-in',
+            str_contains($key, 'instagram') => 'fab fa-instagram',
+            str_contains($key, 'youtube') => 'fab fa-youtube',
+            str_contains($key, 'tiktok') => 'fab fa-tiktok',
+            str_contains($key, 'whatsapp') => 'fab fa-whatsapp',
+            default => 'fas fa-globe',
+        };
     }
 
     public function newsletterHeading(): string
