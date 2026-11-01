@@ -5,19 +5,18 @@ namespace App\Filament\Resources\SiteSettings;
 use App\Filament\Resources\SiteSettings\Pages\ManageSiteSettings;
 use App\Models\SiteSetting;
 use BackedEnum;
-use Filament\Actions\EditAction;
 use Filament\Forms\Components\ColorPicker;
 use Filament\Forms\Components\FileUpload;
 use Filament\Forms\Components\KeyValue;
+use Filament\Forms\Components\Select;
 use Filament\Forms\Components\Textarea;
 use Filament\Forms\Components\TextInput;
-use Filament\Infolists\Components\TextEntry;
 use Filament\Resources\Resource;
 use Filament\Schemas\Components\Section;
+use Filament\Schemas\Components\Tabs;
+use Filament\Schemas\Components\Tabs\Tab;
 use Filament\Schemas\Schema;
 use Filament\Support\Icons\Heroicon;
-use Filament\Tables\Columns\TextColumn;
-use Filament\Tables\Table;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Model;
 
@@ -25,9 +24,15 @@ class SiteSettingResource extends Resource
 {
     protected static ?string $model = SiteSetting::class;
 
+    protected static ?string $navigationLabel = 'Site settings';
+
+    protected static ?string $modelLabel = 'site settings';
+
     protected static string|\UnitEnum|null $navigationGroup = 'Site';
 
     protected static string|BackedEnum|null $navigationIcon = Heroicon::OutlinedCog6Tooth;
+
+    protected static ?int $navigationSort = 10;
 
     public static function getEloquentQuery(): Builder
     {
@@ -53,73 +58,80 @@ class SiteSettingResource extends Resource
 
     public static function form(Schema $schema): Schema
     {
+        $fontOptions = collect(SiteSetting::FONTS)->map(fn (array $font) => $font[0])->all();
+
         return $schema
             ->components([
-                TextInput::make('site_name')->required()->maxLength(100),
-                TextInput::make('tagline')->maxLength(180),
-                TextInput::make('homepage_title')->required()->maxLength(160),
-                Textarea::make('homepage_description')->maxLength(300)->rows(3)->columnSpanFull(),
-                TextInput::make('contact_email')->email()->maxLength(255),
-                FileUpload::make('logo_path')->image()->disk('public')->directory('brand')->visibility('public')->maxSize(2048),
-                KeyValue::make('navigation_links')->label('Custom navigation links')
-                    ->keyLabel('Link label')->valueLabel('URL or path')
-                    ->keyPlaceholder('About us')->valuePlaceholder('/about or https://example.com/about')
-                    ->reorderable()->columnSpanFull(),
-                KeyValue::make('social_links')->label('Social profiles')
-                    ->keyLabel('Network')->valueLabel('Profile URL')
-                    ->keyPlaceholder('Instagram')->valuePlaceholder('https://…')
-                    ->reorderable()->columnSpanFull(),
-
-                Section::make('Brand colours')->columns(2)->columnSpanFull()
-                    ->description('Used for buttons, links, banners and highlights across the public site. Text colour on top is picked automatically for readability.')
-                    ->schema([
-                        ColorPicker::make('primary_color')->label('Primary colour')->placeholder(SiteSetting::DEFAULT_PRIMARY)
-                            ->regex(SiteSetting::HEX_PATTERN)->helperText('Buttons, links and highlights.'),
-                        ColorPicker::make('accent_color')->label('Dark colour')->placeholder(SiteSetting::DEFAULT_ACCENT)
-                            ->regex(SiteSetting::HEX_PATTERN)->helperText('Footer and dark banners.'),
+                Tabs::make('Settings')->columnSpanFull()->persistTabInQueryString()->tabs([
+                    Tab::make('General')->icon(Heroicon::OutlinedHome)->columns(2)->schema([
+                        TextInput::make('site_name')->required()->maxLength(100),
+                        TextInput::make('tagline')->maxLength(180)->helperText('Shown in the footer and search results.'),
+                        TextInput::make('contact_email')->email()->maxLength(255)
+                            ->helperText('Contact form messages are sent here, and it is shown in the footer.'),
+                        Section::make('Homepage fallback')->columnSpanFull()->collapsed()
+                            ->description('Only used when no page is published as the homepage. The homepage then lists the latest insights.')
+                            ->schema([
+                                TextInput::make('homepage_title')->required()->maxLength(160),
+                                Textarea::make('homepage_description')->maxLength(300)->rows(2),
+                            ]),
                     ]),
 
-                Section::make('Footer')->columnSpanFull()->schema([
-                    Textarea::make('footer_text')->label('About text')->rows(3)->maxLength(500)
-                        ->helperText('A short description or address shown in the footer.'),
-                    KeyValue::make('footer_links')->label('Footer links')
-                        ->keyLabel('Link label')->valueLabel('URL or path')
-                        ->keyPlaceholder('Privacy policy')->valuePlaceholder('/privacy')
-                        ->reorderable(),
+                    Tab::make('Branding')->icon(Heroicon::OutlinedSwatch)->schema([
+                        Section::make('Logo & favicon')->columns(2)->schema([
+                            FileUpload::make('logo_path')->label('Logo')->image()->disk('public')->directory('brand')
+                                ->visibility('public')->maxSize(2048)->helperText('Shown in the header. PNG or SVG with a transparent background works best.'),
+                            FileUpload::make('favicon_path')->label('Favicon')->disk('public')->directory('brand')->visibility('public')
+                                ->acceptedFileTypes(['image/png', 'image/x-icon', 'image/vnd.microsoft.icon'])
+                                ->maxSize(512)->helperText('The small icon in browser tabs. A square PNG (at least 64×64) or ICO file.'),
+                        ]),
+                        Section::make('Colours')->columns(2)
+                            ->description('Used for buttons, links, banners and highlights. The text colour on top is picked automatically for readability.')
+                            ->schema([
+                                ColorPicker::make('primary_color')->label('Primary colour')->placeholder(SiteSetting::DEFAULT_PRIMARY)
+                                    ->regex(SiteSetting::HEX_PATTERN)->helperText('Buttons, links and highlights.'),
+                                ColorPicker::make('accent_color')->label('Dark colour')->placeholder(SiteSetting::DEFAULT_ACCENT)
+                                    ->regex(SiteSetting::HEX_PATTERN)->helperText('Footer, statistics and dark banners.'),
+                            ]),
+                        Section::make('Fonts')->columns(3)
+                            ->description('Fonts are loaded from Bunny Fonts, a privacy-friendly font service.')
+                            ->schema([
+                                Select::make('body_font')->label('Text font')->options($fontOptions)
+                                    ->placeholder(SiteSetting::FONTS[SiteSetting::DEFAULT_FONT][0])->searchable(),
+                                Select::make('heading_font')->label('Heading font')->options($fontOptions)
+                                    ->placeholder('Same as text font')->searchable(),
+                                Select::make('base_font_size')->label('Text size')
+                                    ->options(['small' => 'Small', 'normal' => 'Normal', 'large' => 'Large', 'x-large' => 'Extra large'])
+                                    ->placeholder('Normal'),
+                            ]),
+                    ]),
+
+                    Tab::make('Menu')->icon(Heroicon::OutlinedBars3)->schema([
+                        KeyValue::make('navigation_links')->label('Extra menu links')
+                            ->helperText('Pages marked "Show in site menu" appear automatically. Add other links here, e.g. to a partner site.')
+                            ->keyLabel('Link label')->valueLabel('URL or path')
+                            ->keyPlaceholder('Shop')->valuePlaceholder('/shop or https://example.com')
+                            ->reorderable(),
+                    ]),
+
+                    Tab::make('Footer & social')->icon(Heroicon::OutlinedRectangleGroup)->schema([
+                        Textarea::make('footer_text')->label('Footer about text')->rows(3)->maxLength(500)
+                            ->helperText('A short description or address shown in the footer.'),
+                        KeyValue::make('footer_links')->label('Footer links')
+                            ->keyLabel('Link label')->valueLabel('URL or path')
+                            ->keyPlaceholder('Privacy policy')->valuePlaceholder('/privacy')
+                            ->reorderable(),
+                        KeyValue::make('social_links')->label('Social profiles')
+                            ->keyLabel('Network')->valueLabel('Profile URL')
+                            ->keyPlaceholder('LinkedIn')->valuePlaceholder('https://…')
+                            ->reorderable(),
+                    ]),
+
+                    Tab::make('Newsletter')->icon(Heroicon::OutlinedEnvelope)->columns(2)->schema([
+                        TextInput::make('newsletter_heading')->label('Heading')->maxLength(150)->placeholder('Stay in the loop'),
+                        TextInput::make('newsletter_text')->label('Text')->maxLength(300)
+                            ->placeholder('Get our latest insights and upcoming events in your inbox.'),
+                    ]),
                 ]),
-
-                Section::make('Newsletter signup')->columns(2)->columnSpanFull()->schema([
-                    TextInput::make('newsletter_heading')->label('Heading')->maxLength(150)->placeholder('Stay in the loop'),
-                    TextInput::make('newsletter_text')->label('Text')->maxLength(300)
-                        ->placeholder('Get our latest insights and upcoming events in your inbox.'),
-                ]),
-            ]);
-    }
-
-    public static function infolist(Schema $schema): Schema
-    {
-        return $schema
-            ->components([
-                TextEntry::make('site_name'),
-                TextEntry::make('homepage_title'),
-                TextEntry::make('contact_email'),
-                TextEntry::make('updated_at')->dateTime(),
-            ]);
-    }
-
-    public static function table(Table $table): Table
-    {
-        return $table
-            ->columns([
-                TextColumn::make('site_name')->label('Site'),
-                TextColumn::make('homepage_title')->label('Homepage headline'),
-                TextColumn::make('contact_email')->label('Contact'),
-                TextColumn::make('updated_at')->dateTime()->since(),
-            ])
-            ->filters([
-            ])
-            ->recordActions([
-                EditAction::make(),
             ]);
     }
 

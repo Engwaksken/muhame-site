@@ -15,6 +15,7 @@ use Filament\Forms\Components\Textarea;
 use Filament\Forms\Components\TextInput;
 use Filament\Schemas\Components\Grid;
 use Filament\Support\Icons\Heroicon;
+use Illuminate\Support\Str;
 
 /** The content blocks editors can stack to build a page (homepage, About, etc.). */
 class PageBlocks
@@ -38,20 +39,20 @@ class PageBlocks
     public static function blocks(): array
     {
         return [
-            Block::make('hero')->label('Hero banner')->icon(Heroicon::OutlinedSparkles)->schema([
+            Block::make('hero')->label(self::label('Hero banner'))->icon(Heroicon::OutlinedSparkles)->schema([
                 TextInput::make('heading')->required()->maxLength(120),
                 Textarea::make('text')->rows(2)->maxLength(300),
                 self::image('image')->helperText('Wide illustration or photo shown beside the headline. Optional.'),
                 ...self::button(),
             ]),
 
-            Block::make('text')->label('Text section')->icon(Heroicon::OutlinedBars3BottomLeft)->schema([
+            Block::make('text')->label(self::label('Text section'))->icon(Heroicon::OutlinedBars3BottomLeft)->schema([
                 TextInput::make('heading')->maxLength(150),
                 RichEditor::make('content')->required(),
                 ...self::button(),
             ]),
 
-            Block::make('image_text')->label('Image + text')->icon(Heroicon::OutlinedPhoto)->schema([
+            Block::make('image_text')->label(self::label('Image + text'))->icon(Heroicon::OutlinedPhoto)->schema([
                 TextInput::make('heading')->required()->maxLength(150),
                 RichEditor::make('content'),
                 self::image('image')->required(),
@@ -59,7 +60,7 @@ class PageBlocks
                 ...self::button(),
             ]),
 
-            Block::make('cards')->label('Card row')->icon(Heroicon::OutlinedSquares2x2)->schema([
+            Block::make('cards')->label(self::label('Card row'))->icon(Heroicon::OutlinedSquares2x2)->schema([
                 TextInput::make('heading')->maxLength(150),
                 Textarea::make('intro')->rows(2)->maxLength(300),
                 Select::make('columns')->options([2 => '2 per row', 3 => '3 per row', 4 => '4 per row'])->default(3)->required(),
@@ -74,7 +75,7 @@ class PageBlocks
                 ])->minItems(1)->maxItems(12)->defaultItems(3)->collapsible()->itemLabel(fn (array $state) => $state['title'] ?? null),
             ]),
 
-            Block::make('stats')->label('Key statistics')->icon(Heroicon::OutlinedChartBar)->schema([
+            Block::make('stats')->label(self::label('Key statistics'))->icon(Heroicon::OutlinedChartBar)->schema([
                 TextInput::make('heading')->maxLength(150),
                 Repeater::make('items')->label('Statistics')->schema([
                     TextInput::make('value')->required()->maxLength(20)->placeholder('25,000+'),
@@ -82,29 +83,39 @@ class PageBlocks
                 ])->columns(2)->minItems(1)->maxItems(4)->defaultItems(3),
             ]),
 
-            Block::make('latest_posts')->label('Latest insights')->icon(Heroicon::OutlinedNewspaper)->schema([
+            Block::make('latest_posts')->label(self::label('Latest insights'))->icon(Heroicon::OutlinedNewspaper)->schema([
                 TextInput::make('heading')->default('Latest insights')->maxLength(150),
                 Select::make('category_id')->label('Only from category')->placeholder('All categories')
                     ->options(fn () => Category::query()->orderBy('name')->pluck('name', 'id')),
                 Select::make('count')->options([3 => '3', 4 => '4 (1 featured + 3)', 6 => '6'])->default(4)->required(),
             ]),
 
-            Block::make('upcoming_events')->label('Upcoming events')->icon(Heroicon::OutlinedCalendarDays)->schema([
+            Block::make('upcoming_events')->label(self::label('Upcoming events'))->icon(Heroicon::OutlinedCalendarDays)->schema([
                 TextInput::make('heading')->default('Upcoming events')->maxLength(150),
                 Select::make('count')->options([3 => '3', 4 => '4', 6 => '6'])->default(3)->required(),
             ]),
 
-            Block::make('cta_banner')->label('Call-to-action banner')->icon(Heroicon::OutlinedMegaphone)->schema([
+            Block::make('cta_banner')->label(self::label('Call-to-action banner'))->icon(Heroicon::OutlinedMegaphone)->schema([
                 TextInput::make('heading')->required()->maxLength(150),
                 Textarea::make('text')->rows(2)->maxLength(300),
                 ...self::button(required: true),
             ]),
 
-            Block::make('newsletter')->label('Newsletter signup')->icon(Heroicon::OutlinedEnvelope)->schema([
+            Block::make('newsletter')->label(self::label('Newsletter signup'))->icon(Heroicon::OutlinedEnvelope)->schema([
                 TextInput::make('heading')->maxLength(150)->placeholder('Uses the heading from Site settings'),
                 Textarea::make('text')->rows(2)->maxLength(300)->placeholder('Uses the text from Site settings'),
             ]),
         ];
+    }
+
+    /** Block title in the editor, followed by the section's own heading once filled in. */
+    private static function label(string $type): Closure
+    {
+        return function (?array $state) use ($type): string {
+            $heading = trim((string) ($state['heading'] ?? ''));
+
+            return $heading === '' ? $type : $type.': '.Str::limit($heading, 60);
+        };
     }
 
     private static function image(string $name): FileUpload

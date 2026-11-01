@@ -6,7 +6,7 @@
     $navLink = 'inline-flex items-center gap-1 rounded-md px-3 py-2 text-[0.95rem] font-semibold text-stone-800 hover:text-brand-dark focus-visible:outline-2 focus-visible:outline-brand';
 @endphp
 <!DOCTYPE html>
-<html lang="{{ str_replace('_', '-', app()->getLocale()) }}" style="--brand: {{ $brand }}; --brand-fg: {{ \App\Models\SiteSetting::readableTextOn($brand) }}; --ink: {{ $ink }}; --ink-fg: {{ \App\Models\SiteSetting::readableTextOn($ink) }};">
+<html lang="{{ str_replace('_', '-', app()->getLocale()) }}" style="--brand: {{ $brand }}; --brand-fg: {{ \App\Models\SiteSetting::readableTextOn($brand) }}; --ink: {{ $ink }}; --ink-fg: {{ \App\Models\SiteSetting::readableTextOn($ink) }}; --font-body: {{ \App\Models\SiteSetting::fontStack($siteSettings->bodyFontKey()) }}; --font-heading: {{ \App\Models\SiteSetting::fontStack($siteSettings->headingFontKey()) }}; font-size: {{ $siteSettings->baseFontSize() }};">
 <head>
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1">
@@ -22,8 +22,10 @@
     <meta name="twitter:card" content="{{ trim($__env->yieldContent('og_image')) !== '' ? 'summary_large_image' : 'summary' }}">
     <meta name="theme-color" content="{{ $brand }}">
     <title>{{ trim($__env->yieldContent('title', $siteSettings->site_name)) }}</title>
+    <link rel="icon" href="{{ $siteSettings->faviconUrl() }}">
+    <link rel="apple-touch-icon" href="{{ $siteSettings->faviconUrl() }}">
     <link rel="preconnect" href="https://fonts.bunny.net">
-    <link href="https://fonts.bunny.net/css?family=instrument-sans:400,500,600,700" rel="stylesheet">
+    <link href="{{ $siteSettings->fontStylesheetUrl() }}" rel="stylesheet">
     @vite(['resources/css/app.css', 'resources/js/app.js'])
 </head>
 <body class="flex min-h-screen flex-col bg-white text-stone-900 antialiased">

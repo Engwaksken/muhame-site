@@ -3,6 +3,7 @@
 namespace Tests\Feature;
 
 use App\Filament\Resources\Pages\Pages\CreatePage;
+use App\Filament\Resources\SiteSettings\Pages\ManageSiteSettings;
 use App\Filament\Resources\Subscribers\Pages\ManageSubscribers;
 use App\Models\Event;
 use App\Models\Page;
@@ -219,6 +220,67 @@ class SiteRedesignTest extends TestCase
         Livewire::test(ManageSubscribers::class)
             ->callAction('exportCsv')
             ->assertFileDownloaded('subscribers-'.now()->format('Y-m-d').'.csv', content: "email,name,subscribed_at\na@example.org,\"'=HYPERLINK(\"\"x\"\")\",\"".Subscriber::query()->first()->created_at->toDateTimeString()."\"\n");
+    }
+
+    public function test_admin_saves_site_settings_from_the_tabbed_page(): void
+    {
+        $this->seed();
+        $this->actingAs(User::factory()->create()->assignRole('Admin'));
+
+        $this->get('/admin/site-settings')->assertOk()
+            ->assertSee('Branding')->assertSee('Footer &amp; social', false)->assertSee('Newsletter');
+
+        Livewire::test(ManageSiteSettings::class)
+            ->fillForm([
+                'site_name' => 'Muhame',
+                'homepage_title' => 'Welcome',
+                'body_font' => 'inter',
+                'heading_font' => 'playfair-display',
+                'base_font_size' => 'large',
+                'primary_color' => '#0B5FFF',
+            ])
+            ->call('save')
+            ->assertHasNoFormErrors();
+
+        $settings = SiteSetting::query()->find(1);
+        $this->assertSame('inter', $settings->body_font);
+        $this->assertSame('#0B5FFF', $settings->primary_color);
+    }
+
+    public function test_chosen_fonts_size_and_favicon_are_used_on_the_public_site(): void
+    {
+        SiteSetting::current()->update([
+            'body_font' => 'inter', 'heading_font' => 'playfair-display', 'base_font_size' => 'large', 'favicon_path' => 'brand/icon.png',
+        ]);
+
+        $this->get('/contact')->assertOk()
+            ->assertSee('https://fonts.bunny.net/css?family=inter:400,500,600,700|playfair-display:400,500,600,700', false)
+            ->assertSee('--font-body: &#039;Inter&#039;', false)
+            ->assertSee('--font-heading: &#039;Playfair Display&#039;', false)
+            ->assertSee('font-size: 17px', false)
+            ->assertSee('rel="icon" href="'.url('/storage/brand/icon.png').'"', false);
+    }
+
+    public function test_unknown_font_values_fall_back_to_the_default(): void
+    {
+        SiteSetting::current()->update(['body_font' => "x'); }</style><script>", 'heading_font' => null, 'base_font_size' => '999px']);
+
+        $this->get('/contact')->assertOk()
+            ->assertSee('family=instrument-sans:400,500,600,700&', false)
+            ->assertSee('font-size: 16px', false)
+            ->assertSee('rel="icon" href="'.asset('favicon.ico').'"', false)
+            ->assertDontSee('</style><script>', false);
+    }
+
+    public function test_page_editor_opens_with_tabs_for_the_seeded_homepage(): void
+    {
+        $this->seed();
+        $this->actingAs(User::factory()->create()->assignRole('Admin'));
+        $home = Page::query()->where('slug', 'home')->firstOrFail();
+
+        $this->get('/admin/pages/'.$home->id.'/edit')->assertOk()
+            ->assertSee('Page header')->assertSee('Sections')->assertSee('Publishing &amp; menu', false)
+            ->assertSee('Hero banner: A clear headline');
     }
 
     public function test_starter_homepage_is_seeded_as_a_draft_once(): void

@@ -5,9 +5,9 @@
 @source '../**/*.blade.php';
 @source '../**/*.js';
 
-@theme {
-    --font-sans: 'Instrument Sans', ui-sans-serif, system-ui, sans-serif, 'Apple Color Emoji', 'Segoe UI Emoji',
-        'Segoe UI Symbol', 'Noto Color Emoji';
+@theme inline {
+    /* Set from Site settings via --font-body on <html>. */
+    --font-sans: var(--font-body);
 }
 
 /*
@@ -20,6 +20,16 @@
     --brand-fg: #ffffff;
     --ink: #1c1917;
     --ink-fg: #ffffff;
+    --font-body: 'Instrument Sans', ui-sans-serif, system-ui, sans-serif;
+    --font-heading: var(--font-body);
+}
+
+html, body {
+    font-family: var(--font-body);
+}
+
+h1, h2, h3, h4, h5, h6 {
+    font-family: var(--font-heading);
 }
 
 @theme inline {

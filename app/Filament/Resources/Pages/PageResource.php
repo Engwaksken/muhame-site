@@ -23,6 +23,7 @@ use Filament\Resources\Resource;
 use Filament\Schemas\Components\Section;
 use Filament\Schemas\Components\Tabs;
 use Filament\Schemas\Components\Tabs\Tab;
+use Filament\Schemas\Components\Utilities\Get;
 use Filament\Schemas\Components\Utilities\Set;
 use Filament\Schemas\Schema;
 use Filament\Support\Icons\Heroicon;
@@ -49,17 +50,26 @@ class PageResource extends Resource
         return $schema
             ->components([
                 Tabs::make()->columnSpanFull()->persistTabInQueryString()->tabs([
-                    Tab::make('Content')->icon(Heroicon::OutlinedPencilSquare)->schema([
+                    Tab::make('Page header')->icon(Heroicon::OutlinedPencilSquare)->columns(2)->schema([
                         TextInput::make('title')->required()->maxLength(255)->live(onBlur: true)
                             ->afterStateUpdated(fn (Set $set, ?string $state, string $operation) => $operation === 'create'
                                 ? $set('slug', Str::slug($state ?? '')) : null),
-                        Textarea::make('excerpt')->label('Introduction')->rows(2)->maxLength(300)
-                            ->helperText('Shown under the title at the top of the page, and on cards linking to it.'),
+                        Textarea::make('excerpt')->label('Introduction')->rows(3)->maxLength(300)
+                            ->helperText('Shown under the title at the top of the page, and in menu dropdowns.'),
                         FileUpload::make('hero_image')->label('Header image')->image()->disk('public')->directory('pages')
-                            ->visibility('public')->maxSize(5120)->helperText('Optional wide image at the top of the page.'),
-                        PageBlocks::builder(),
-                        RichEditor::make('body')->label('Simple page text')
-                            ->helperText('Optional. Shown only when the page has no sections above. Handy for plain pages like a privacy policy.'),
+                            ->visibility('public')->maxSize(5120)->columnSpanFull()
+                            ->helperText('Optional wide image at the top of the page. Not shown when the page starts with a Hero banner section.'),
+                    ]),
+
+                    Tab::make('Sections')->icon(Heroicon::OutlinedSquares2x2)
+                        ->badge(fn (Get $get) => count($get('blocks') ?? []) ?: null)
+                        ->schema([
+                            PageBlocks::builder()->collapsed(),
+                        ]),
+
+                    Tab::make('Simple text')->icon(Heroicon::OutlinedDocumentText)->schema([
+                        RichEditor::make('body')->hiddenLabel()
+                            ->helperText('Optional. Shown only when the page has no sections. Handy for plain pages like a privacy policy.'),
                     ]),
 
                     Tab::make('Publishing & menu')->icon(Heroicon::OutlinedBars3)->columns(2)->schema([
