@@ -215,4 +215,33 @@ class CmsFoundationTest extends TestCase
             ->assertSee('Instagram')
             ->assertDontSee('javascript:alert(1)', false);
     }
+
+    public function test_create_admin_command_seeds_roles_and_grants_panel_access(): void
+    {
+        $this->artisan('cms:create-admin', ['email' => 'owner@muhame.test', '--name' => 'Site Owner'])
+            ->expectsQuestion('Password (at least 12 characters)', 'a-long-secure-password')
+            ->assertSuccessful();
+
+        $user = User::query()->where('email', 'owner@muhame.test')->firstOrFail();
+
+        $this->assertTrue($user->hasRole('Super Admin'));
+        $this->assertSame('Site Owner', $user->name);
+        $this->actingAs($user)->get('/admin')->assertOk();
+    }
+
+    public function test_create_admin_command_rejects_short_passwords(): void
+    {
+        $this->artisan('cms:create-admin', ['email' => 'owner@muhame.test'])
+            ->expectsQuestion('Password (at least 12 characters)', 'short')
+            ->assertFailed();
+
+        $this->assertDatabaseMissing('users', ['email' => 'owner@muhame.test']);
+    }
+
+    public function test_robots_txt_is_served_dynamically_with_the_app_url(): void
+    {
+        $this->assertFileDoesNotExist(public_path('robots.txt'));
+
+        $this->get('/robots.txt')->assertOk()->assertSee('Sitemap: '.route('sitemap'));
+    }
 }

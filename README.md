@@ -1,58 +1,90 @@
-<p align="center"><a href="https://laravel.com" target="_blank"><img src="https://raw.githubusercontent.com/laravel/art/master/logo-lockup/5%20SVG/2%20CMYK/1%20Full%20Color/laravel-logolockup-cmyk-red.svg" width="400" alt="Laravel Logo"></a></p>
+# Muhame Site
 
-<p align="center">
-<a href="https://github.com/laravel/framework/actions"><img src="https://github.com/laravel/framework/workflows/tests/badge.svg" alt="Build Status"></a>
-<a href="https://packagist.org/packages/laravel/framework"><img src="https://img.shields.io/packagist/dt/laravel/framework" alt="Total Downloads"></a>
-<a href="https://packagist.org/packages/laravel/framework"><img src="https://img.shields.io/packagist/v/laravel/framework" alt="Latest Stable Version"></a>
-<a href="https://packagist.org/packages/laravel/framework"><img src="https://img.shields.io/packagist/l/laravel/framework" alt="License"></a>
-</p>
+The Muhame website and content management system, built with Laravel 13 and Filament 5.
 
-## About Laravel
+- **Public site:** home page, posts, categories, tags, search, `sitemap.xml` and `robots.txt`
+- **Admin panel:** `/admin` for managing posts, categories, tags and site settings
+- **Roles:** Super Admin, Admin, Editor, Author, Contributor, Moderator and Viewer (via `spatie/laravel-permission`)
 
-Laravel is a web application framework with expressive, elegant syntax. We believe development must be an enjoyable and creative experience to be truly fulfilling. Laravel takes the pain out of development by easing common tasks used in many web projects, such as:
+## Requirements
 
-- [Simple, fast routing engine](https://laravel.com/docs/routing).
-- [Powerful dependency injection container](https://laravel.com/docs/container).
-- Multiple back-ends for [session](https://laravel.com/docs/session) and [cache](https://laravel.com/docs/cache) storage.
-- Expressive, intuitive [database ORM](https://laravel.com/docs/eloquent).
-- Database agnostic [schema migrations](https://laravel.com/docs/migrations).
-- [Robust background job processing](https://laravel.com/docs/queues).
-- [Real-time event broadcasting](https://laravel.com/docs/broadcasting).
+- PHP 8.4+ with the `intl`, `mbstring`, `fileinfo`, `zip` and `pdo_mysql` extensions
+- Composer 2
+- Node.js 20+ and npm (only needed to build assets)
+- MySQL 8 or MariaDB 10.6+
 
-Laravel is accessible, powerful, and provides tools required for large, robust applications.
-
-## Learning Laravel
-
-Laravel has the most extensive and thorough [documentation](https://laravel.com/docs) and video tutorial library of all modern web application frameworks, making it a breeze to get started with the framework.
-
-In addition, [Laracasts](https://laracasts.com) contains thousands of video tutorials on a range of topics including Laravel, modern PHP, unit testing, and JavaScript. Boost your skills by digging into our comprehensive video library.
-
-You can also watch bite-sized lessons with real-world projects on [Laravel Learn](https://laravel.com/learn), where you will be guided through building a Laravel application from scratch while learning PHP fundamentals.
-
-## Agentic Development
-
-Laravel's predictable structure and conventions make it ideal for AI coding agents like Claude Code, Cursor, and GitHub Copilot. Install [Laravel Boost](https://laravel.com/docs/ai) to supercharge your AI workflow:
+## Local development
 
 ```bash
-composer require laravel/boost --dev
-
-php artisan boost:install
+composer setup                 # installs deps, creates .env, generates key, migrates, builds assets
+php artisan db:seed            # creates roles, permissions and default site settings
+php artisan storage:link       # serves uploaded images
+php artisan cms:create-admin you@example.com --name="Your Name"
+composer dev                   # runs the server, queue worker, logs and Vite together
 ```
 
-Boost provides your agent 15+ tools and skills that help agents build Laravel applications while following best practices.
+Then sign in at http://localhost:8000/admin.
 
-## Contributing
+Run the tests with `composer test`, and check code style with `vendor/bin/pint`.
 
-Thank you for considering contributing to the Laravel framework! The contribution guide can be found in the [Laravel documentation](https://laravel.com/docs/contributions).
+## Production deployment
 
-## Code of Conduct
+### 1. Environment
 
-In order to ensure that the Laravel community is welcoming to all, please review and abide by the [Code of Conduct](https://laravel.com/docs/contributions#code-of-conduct).
+Copy `.env.example` to `.env` on the server and set at least these values:
 
-## Security Vulnerabilities
+```dotenv
+APP_NAME=Muhame
+APP_ENV=production
+APP_DEBUG=false
+APP_URL=https://your-domain.com
+LOG_LEVEL=warning
 
-If you discover a security vulnerability within Laravel, please send an e-mail to Taylor Otwell via [taylor@laravel.com](mailto:taylor@laravel.com). All security vulnerabilities will be promptly addressed.
+DB_DATABASE=...
+DB_USERNAME=...           # a dedicated user, not root
+DB_PASSWORD=...
 
-## License
+SESSION_ENCRYPT=true
+SESSION_SECURE_COOKIE=true
 
-The Laravel framework is open-sourced software licensed under the [MIT license](https://opensource.org/licenses/MIT).
+MAIL_MAILER=smtp          # plus MAIL_HOST / MAIL_USERNAME / MAIL_PASSWORD
+MAIL_FROM_ADDRESS=hello@your-domain.com
+
+CMS_ALLOW_REGISTRATION=false
+```
+
+Run `php artisan key:generate` once on the first deploy, and never change the key afterwards.
+
+### 2. Deploy steps
+
+```bash
+composer install --no-dev --optimize-autoloader --no-interaction
+npm ci && npm run build
+php artisan migrate --force
+php artisan db:seed --force          # safe to re-run; syncs roles and permissions
+php artisan storage:link             # first deploy only
+php artisan optimize                 # caches config, routes, views and events
+php artisan filament:optimize        # caches Filament components and icons
+```
+
+On the first deploy, create the first administrator:
+
+```bash
+php artisan cms:create-admin owner@your-domain.com --name="Site Owner"
+```
+
+The same command resets the password of an existing user and makes them a Super Admin.
+
+### 3. Server
+
+- Point the web server's document root at `public/`.
+- `storage/` and `bootstrap/cache/` must be writable by the web server user.
+- Serve the site over HTTPS. In production, the app generates `https://` URLs and refuses destructive database commands such as `migrate:fresh` and `db:wipe`.
+- Run a queue worker (Supervisor or systemd): `php artisan queue:work --tries=3`.
+- Add the scheduler to cron: `* * * * * cd /path/to/app && php artisan schedule:run >> /dev/null 2>&1`.
+
+## Notes
+
+- Public sign-up for the admin panel is disabled. It can only be enabled in a `local` environment with `CMS_ALLOW_REGISTRATION=true`.
+- Post HTML is sanitized before it is shown on the public site, and navigation and social links are restricted to safe URLs.
+- `robots.txt` and `sitemap.xml` are generated from `APP_URL`, so don't add a static `public/robots.txt`.

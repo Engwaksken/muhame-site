@@ -3,6 +3,8 @@
 namespace App\Providers;
 
 use App\Models\SiteSetting;
+use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\URL;
 use Illuminate\Support\Facades\View;
 use Illuminate\Support\ServiceProvider;
 
@@ -21,6 +23,11 @@ class AppServiceProvider extends ServiceProvider
      */
     public function boot(): void
     {
+        // Production hardening: generate https:// URLs behind proxies/load balancers
+        // and block migrate:fresh / db:wipe style commands against the live database.
+        URL::forceHttps($this->app->isProduction());
+        DB::prohibitDestructiveCommands($this->app->isProduction());
+
         View::composer(['layouts.public', 'public.*'], function ($view): void {
             $view->with('siteSettings', SiteSetting::current());
         });
