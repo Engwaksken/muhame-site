@@ -28,6 +28,9 @@
             </a>
             <nav aria-label="Main navigation" class="flex flex-wrap items-center gap-x-6 gap-y-2 text-sm font-medium text-stone-600">
                 <a href="{{ route('posts.index') }}" class="hover:text-amber-700">Stories</a>
+                @foreach ($navigationPages as $navigationPage)
+                    <a href="{{ route('pages.show', $navigationPage->slug) }}" class="hover:text-amber-700" @if (request()->is($navigationPage->slug)) aria-current="page" @endif>{{ $navigationPage->title }}</a>
+                @endforeach
                 @foreach ($siteSettings->publicNavigationLinks() as $label => $url)
                     <a href="{{ $url }}" class="hover:text-amber-700" @if (str_starts_with($url, 'http')) target="_blank" rel="noopener noreferrer" @endif>{{ $label }}</a>
                 @endforeach
@@ -36,6 +39,7 @@
                         {{ $navigationCategory->name }}
                     </a>
                 @endforeach
+                <a href="{{ route('contact') }}" class="hover:text-amber-700" @if (request()->routeIs('contact')) aria-current="page" @endif>Contact</a>
                 <a href="{{ url('/admin/login') }}" class="rounded-full border border-stone-300 px-4 py-2 text-stone-800 hover:border-amber-600 hover:text-amber-700">Admin</a>
             </nav>
             <form action="{{ route('search') }}" method="GET" role="search" class="flex w-full gap-2 sm:ml-auto sm:w-auto">

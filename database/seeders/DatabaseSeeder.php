@@ -27,7 +27,15 @@ class DatabaseSeeder extends Seeder
                 ['viewAny', 'create', 'update', 'delete'],
             ))
             ->all();
-        $allPermissions = array_merge($postPermissions, $taxonomyPermissions, ['settings.viewAny', 'settings.update']);
+        $pagePermissions = ['pages.viewAny', 'pages.create', 'pages.update', 'pages.delete'];
+        $messagePermissions = ['messages.viewAny', 'messages.delete'];
+        $allPermissions = array_merge(
+            $postPermissions,
+            $taxonomyPermissions,
+            $pagePermissions,
+            $messagePermissions,
+            ['settings.viewAny', 'settings.update'],
+        );
 
         collect($allPermissions)
             ->map(fn (string $name) => Permission::findOrCreate($name, 'web'));
@@ -38,7 +46,7 @@ class DatabaseSeeder extends Seeder
         $roles = [
             'Super Admin' => $allPermissions,
             'Admin' => $allPermissions,
-            'Editor' => array_merge($postPermissions, ['categories.viewAny', 'categories.create', 'categories.update', 'tags.viewAny', 'tags.create', 'tags.update']),
+            'Editor' => array_merge($postPermissions, ['categories.viewAny', 'categories.create', 'categories.update', 'tags.viewAny', 'tags.create', 'tags.update', 'pages.viewAny', 'pages.create', 'pages.update']),
             'Author' => ['posts.viewAny', 'posts.view', 'posts.create', 'posts.update'],
             'Contributor' => ['posts.viewAny', 'posts.view', 'posts.create'],
             'Moderator' => ['posts.viewAny', 'posts.view', 'posts.update', 'posts.publish', 'categories.viewAny', 'tags.viewAny'],

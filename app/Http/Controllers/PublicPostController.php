@@ -3,16 +3,16 @@
 namespace App\Http\Controllers;
 
 use App\Models\Category;
+use App\Models\Page;
 use App\Models\Post;
 use App\Models\SiteSetting;
 use App\Models\Tag;
+use App\Support\SafeHtml;
 use Illuminate\Contracts\View\View;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Http\Request;
 use Illuminate\Http\Response;
 use Illuminate\Support\Str;
-use Symfony\Component\HtmlSanitizer\HtmlSanitizer;
-use Symfony\Component\HtmlSanitizer\HtmlSanitizerConfig;
 
 class PublicPostController extends Controller
 {
@@ -26,9 +26,7 @@ class PublicPostController extends Controller
             'description' => $isHomepage
                 ? $settings->homepage_description
                 : 'Ideas, updates, and perspectives from our team.',
-            'posts' => $this->publishedPosts()->paginate(12),
-            'navigationCategories' => $this->navigationCategories(),
-        ]);
+            'posts' => $this->publishedPosts()->paginate(12),        ]);
     }
 
     public function search(Request $request): View
@@ -47,26 +45,19 @@ class PublicPostController extends Controller
             'heading' => 'Search results',
             'description' => "Stories matching “{$term}”.",
             'posts' => $posts,
-            'searchQuery' => $term,
-            'navigationCategories' => $this->navigationCategories(),
-        ]);
+            'searchQuery' => $term,        ]);
     }
 
     public function show(string $slug): View
     {
         $post = $this->publishedPosts()->where('slug', $slug)->firstOrFail();
-        $sanitizer = new HtmlSanitizer(
-            (new HtmlSanitizerConfig)->allowSafeElements()->allowRelativeLinks(),
-        );
-        $safeBody = $sanitizer->sanitize($post->body);
+        $safeBody = SafeHtml::clean($post->body);
 
         return view('public.posts.show', [
             'post' => $post,
             'seoTitle' => strip_tags($post->seo_title ?: $post->title),
             'safeBody' => $safeBody,
-            'description' => Str::limit(strip_tags($safeBody), 155),
-            'navigationCategories' => $this->navigationCategories(),
-        ]);
+            'description' => Str::limit(strip_tags($safeBody), 155),        ]);
     }
 
     public function category(string $slug): View
@@ -78,9 +69,7 @@ class PublicPostController extends Controller
             'description' => $category->description,
             'posts' => $this->publishedPosts()
                 ->where('category_id', $category->id)
-                ->paginate(12),
-            'navigationCategories' => $this->navigationCategories(),
-        ]);
+                ->paginate(12),        ]);
     }
 
     public function tag(string $slug): View
@@ -92,9 +81,7 @@ class PublicPostController extends Controller
             'description' => null,
             'posts' => $this->publishedPosts()
                 ->whereHas('tags', fn (Builder $query) => $query->where('tags.id', $tag->id))
-                ->paginate(12),
-            'navigationCategories' => $this->navigationCategories(),
-        ]);
+                ->paginate(12),        ]);
     }
 
     public function sitemap(): Response
@@ -102,7 +89,13 @@ class PublicPostController extends Controller
         $urls = [
             [route('home'), now()->toAtomString()],
             [route('posts.index'), now()->toAtomString()],
+            [route('contact'), now()->toAtomString()],
         ];
+
+        Page::query()->published()->where('noindex', false)->orderBy('slug')->get(['slug', 'updated_at'])
+            ->each(function (Page $page) use (&$urls): void {
+                $urls[] = [route('pages.show', $page->slug), $page->updated_at->toAtomString()];
+            });
 
         Post::query()->published()->where('noindex', false)->orderBy('slug')->get(['slug', 'updated_at'])
             ->each(function (Post $post) use (&$urls): void {
@@ -148,14 +141,5 @@ class PublicPostController extends Controller
             ->published()
             ->with(['author', 'category', 'tags'])
             ->latest('published_at');
-    }
-
-    private function navigationCategories()
-    {
-        return Category::query()
-            ->whereHas('posts', fn (Builder $query) => $query->published())
-            ->orderBy('name')
-            ->limit(6)
-            ->get();
     }
 }

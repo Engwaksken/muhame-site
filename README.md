@@ -3,7 +3,9 @@
 The Muhame website and content management system, built with Laravel 13 and Filament 5.
 
 - **Public site:** home page, posts, categories, tags, search, `sitemap.xml` and `robots.txt`
-- **Admin panel:** `/admin` for managing posts, categories, tags and site settings
+- **Pages:** admin-editable pages such as About or Services at `/{slug}`, optionally shown in the site menu
+- **Contact form:** `/contact` saves messages to the admin inbox and emails the site's contact address, with spam protection (honeypot and rate limit)
+- **Admin panel:** `/admin` for managing posts, categories, tags, pages, the inbox and site settings
 - **Roles:** Super Admin, Admin, Editor, Author, Contributor, Moderator and Viewer (via `spatie/laravel-permission`)
 
 ## Requirements
@@ -87,4 +89,6 @@ The same command resets the password of an existing user and makes them a Super 
 
 - Public sign-up for the admin panel is disabled. It can only be enabled in a `local` environment with `CMS_ALLOW_REGISTRATION=true`.
 - Post HTML is sanitized before it is shown on the public site, and navigation and social links are restricted to safe URLs.
+- Contact form emails go to the **Contact email** in Site settings (or `MAIL_FROM_ADDRESS` if it's empty). They're queued, so a queue worker must be running and `MAIL_*` must point at a real mail server.
+- Page addresses can't reuse paths the site already has, such as `admin`, `posts` or `contact`. See `Page::RESERVED_SLUGS`.
 - `robots.txt` and `sitemap.xml` are generated from `APP_URL`, so don't add a static `public/robots.txt`.
