@@ -11,7 +11,7 @@ use Illuminate\Database\Eloquent\Model;
     'site_name', 'tagline', 'homepage_title', 'homepage_description', 'contact_email', 'logo_path',
     'navigation_links', 'social_links', 'primary_color', 'accent_color', 'footer_text', 'footer_links',
     'newsletter_heading', 'newsletter_text', 'favicon_path', 'body_font', 'heading_font', 'base_font_size',
-    'contact_phone', 'contact_address', 'office_hours', 'map_location',
+    'contact_phone', 'contact_address', 'office_hours', 'map_location', 'map_embed_url',
 ])]
 class SiteSetting extends Model
 {
@@ -155,12 +155,53 @@ class SiteSetting extends Model
         return strlen(ltrim($digits, '+')) >= 5 ? 'tel:'.$digits : null;
     }
 
-    /** Google Maps embed for the map location (an address or "lat,lng"), or null. No API key needed. */
+    /**
+     * The map shown on the contact page: the pasted embed code if there is one,
+     * otherwise a Google Maps embed of the map location. No API key needed.
+     */
     public function mapEmbedUrl(): ?string
     {
+        if ($embed = self::extractMapEmbedUrl($this->map_embed_url)) {
+            return $embed;
+        }
+
         return filled($this->map_location)
             ? 'https://www.google.com/maps?q='.rawurlencode(trim($this->map_location)).'&output=embed'
             : null;
+    }
+
+    /**
+     * Pulls the map URL out of pasted embed code (<iframe src="…">) or a plain URL.
+     * Only Google Maps and OpenStreetMap embed URLs are accepted; anything else returns null.
+     */
+    public static function extractMapEmbedUrl(?string $input): ?string
+    {
+        $input = trim((string) $input);
+
+        if ($input === '') {
+            return null;
+        }
+
+        if (preg_match('/\bsrc\s*=\s*["\']([^"\']+)["\']/i', $input, $match)) {
+            $input = $match[1];
+        }
+
+        $url = html_entity_decode(trim($input), ENT_QUOTES | ENT_HTML5);
+        $parts = parse_url($url);
+
+        if (($parts['scheme'] ?? null) !== 'https' || isset($parts['user']) || isset($parts['pass'])) {
+            return null;
+        }
+
+        $host = strtolower($parts['host'] ?? '');
+        $path = $parts['path'] ?? '';
+        parse_str($parts['query'] ?? '', $query);
+
+        $isGoogle = in_array($host, ['www.google.com', 'google.com', 'maps.google.com'], true)
+            && (str_starts_with($path, '/maps/embed') || ($path === '/maps' && ($query['output'] ?? null) === 'embed'));
+        $isOpenStreetMap = $host === 'www.openstreetmap.org' && $path === '/export/embed.html';
+
+        return ($isGoogle || $isOpenStreetMap) ? $url : null;
     }
 
     public function mapDirectionsUrl(): ?string

@@ -158,10 +158,12 @@
                                 <h2 class="flex items-center gap-2.5 font-bold text-stone-950">
                                     <i class="fas fa-map-location-dot text-brand-dark" aria-hidden="true"></i> Our location
                                 </h2>
-                                <a href="{{ $siteSettings->mapDirectionsUrl() }}" target="_blank" rel="noopener noreferrer"
-                                    class="inline-flex items-center gap-1.5 text-sm font-semibold text-brand-dark hover:underline">
-                                    <i class="fas fa-diamond-turn-right" aria-hidden="true"></i> Get directions
-                                </a>
+                                @if ($directionsUrl = $siteSettings->mapDirectionsUrl())
+                                    <a href="{{ $directionsUrl }}" target="_blank" rel="noopener noreferrer"
+                                        class="inline-flex items-center gap-1.5 text-sm font-semibold text-brand-dark hover:underline">
+                                        <i class="fas fa-diamond-turn-right" aria-hidden="true"></i> Get directions
+                                    </a>
+                                @endif
                             </div>
                             <iframe src="{{ $mapEmbedUrl }}" title="Map showing the location of {{ $siteSettings->site_name }}"
                                 class="block h-72 w-full border-0" loading="lazy"

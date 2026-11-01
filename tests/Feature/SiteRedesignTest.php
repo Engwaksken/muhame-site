@@ -2,7 +2,9 @@
 
 namespace Tests\Feature;
 
+use App\Filament\Resources\Events\Pages\ManageEvents;
 use App\Filament\Resources\Pages\Pages\CreatePage;
+use App\Filament\Resources\Posts\Pages\ManagePosts;
 use App\Filament\Resources\SiteSettings\Pages\ManageSiteSettings;
 use App\Filament\Resources\Subscribers\Pages\ManageSubscribers;
 use App\Models\Event;
@@ -11,6 +13,9 @@ use App\Models\Post;
 use App\Models\SiteSetting;
 use App\Models\Subscriber;
 use App\Models\User;
+use Filament\Actions\CreateAction;
+use Filament\Actions\EditAction;
+use Filament\Support\Enums\Width;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Livewire\Livewire;
 use Tests\TestCase;
@@ -281,6 +286,43 @@ class SiteRedesignTest extends TestCase
         $this->get('/admin/pages/'.$home->id.'/edit')->assertOk()
             ->assertSee('Page header')->assertSee('Sections')->assertSee('Publishing &amp; menu', false)
             ->assertSee('Hero banner: A clear headline');
+    }
+
+    public function test_admin_creates_a_post_and_an_event_through_the_tabbed_forms(): void
+    {
+        $this->seed();
+        $this->actingAs(User::factory()->create()->assignRole('Admin'));
+
+        Livewire::test(ManagePosts::class)
+            ->callAction('create', data: ['title' => 'Tabbed post', 'slug' => 'tabbed-post', 'body' => '<p>Hello</p>', 'status' => 'published'])
+            ->assertHasNoActionErrors();
+
+        Livewire::test(ManageEvents::class)
+            ->callAction('create', data: ['title' => 'Tabbed event', 'slug' => 'tabbed-event', 'starts_at' => now()->addWeek()->format('Y-m-d H:i'), 'status' => 'published'])
+            ->assertHasNoActionErrors();
+
+        $this->get('/insights/tabbed-post')->assertOk()->assertSee('Hello');
+        $this->get('/events/tabbed-event')->assertOk()->assertSee('Tabbed event');
+    }
+
+    public function test_editing_a_post_title_keeps_its_address(): void
+    {
+        $this->seed();
+        $this->actingAs(User::factory()->create()->assignRole('Admin'));
+        $post = Post::factory()->create(['title' => 'Old title', 'slug' => 'old-title', 'status' => 'published']);
+
+        Livewire::test(ManagePosts::class)
+            ->callTableAction('edit', $post, data: ['title' => 'New title'])
+            ->assertHasNoTableActionErrors();
+
+        $this->assertSame('old-title', $post->fresh()->slug);
+        $this->assertSame('New title', $post->fresh()->title);
+    }
+
+    public function test_admin_pop_up_forms_use_sensible_widths(): void
+    {
+        $this->assertSame(Width::TwoExtraLarge, CreateAction::make()->getModalWidth());
+        $this->assertSame(Width::TwoExtraLarge, EditAction::make()->getModalWidth());
     }
 
     public function test_starter_homepage_is_seeded_as_a_draft_once(): void

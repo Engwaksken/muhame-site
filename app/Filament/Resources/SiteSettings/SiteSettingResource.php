@@ -5,6 +5,7 @@ namespace App\Filament\Resources\SiteSettings;
 use App\Filament\Resources\SiteSettings\Pages\ManageSiteSettings;
 use App\Models\SiteSetting;
 use BackedEnum;
+use Closure;
 use Filament\Forms\Components\ColorPicker;
 use Filament\Forms\Components\FileUpload;
 use Filament\Forms\Components\KeyValue;
@@ -82,9 +83,22 @@ class SiteSettingResource extends Resource
                             ->placeholder("Plot 12, Example Road\nKampala, Uganda"),
                         Textarea::make('office_hours')->label('Opening hours')->rows(3)->maxLength(300)
                             ->placeholder("Mon – Fri: 8:00 – 17:00\nSat: 9:00 – 13:00"),
-                        TextInput::make('map_location')->label('Map location')->maxLength(255)->columnSpanFull()
-                            ->placeholder('Muhame, Kampala, Uganda   or   0.3476,32.5825')
-                            ->helperText('An address or place name, or latitude,longitude. Shows a Google map with a "Get directions" link on the contact page. Leave empty to hide the map.'),
+                        Section::make('Map')->columnSpanFull()
+                            ->description('Use either option. If both are filled in, the embed code is used for the map and the location for the "Get directions" link.')
+                            ->schema([
+                                Textarea::make('map_embed_url')->label('Option 1: paste map embed code')->rows(3)
+                                    ->placeholder('<iframe src="https://www.google.com/maps/embed?pb=…" …></iframe>')
+                                    ->helperText('In Google Maps, find your place, click Share → Embed a map → Copy HTML, and paste it here. OpenStreetMap embed code also works.')
+                                    ->rules([fn () => function (string $attribute, mixed $value, Closure $fail): void {
+                                        if (filled($value) && SiteSetting::extractMapEmbedUrl($value) === null) {
+                                            $fail('This doesn\'t look like Google Maps or OpenStreetMap embed code. Copy it from Share → Embed a map.');
+                                        }
+                                    }])
+                                    ->dehydrateStateUsing(fn (?string $state) => SiteSetting::extractMapEmbedUrl($state)),
+                                TextInput::make('map_location')->label('Option 2: map location')->maxLength(255)
+                                    ->placeholder('Muhame, Kampala, Uganda   or   0.3476,32.5825')
+                                    ->helperText('An address, place name, or latitude,longitude. Also used for the "Get directions" link.'),
+                            ]),
                     ]),
 
                     Tab::make('Branding')->icon(Heroicon::OutlinedSwatch)->schema([

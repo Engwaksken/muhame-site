@@ -4,6 +4,7 @@ namespace Tests\Feature;
 
 use App\Filament\Resources\ContactMessages\Pages\ManageContactMessages;
 use App\Filament\Resources\Pages\Pages\CreatePage;
+use App\Filament\Resources\SiteSettings\Pages\ManageSiteSettings;
 use App\Mail\ContactMessageReceived;
 use App\Models\ContactMessage;
 use App\Models\Page;
@@ -113,6 +114,45 @@ class PagesAndContactTest extends TestCase
             ->assertDontSee('aria-label="Contact details"', false)
             ->assertDontSee('<iframe', false)
             ->assertDontSee('Get directions');
+    }
+
+    public function test_pasted_google_maps_embed_code_is_used_for_the_map(): void
+    {
+        SiteSetting::current()->update([
+            'map_embed_url' => '<iframe src="https://www.google.com/maps/embed?pb=!1m18!1m12!3d0.34" width="600" height="450" style="border:0;" allowfullscreen="" loading="lazy"></iframe>',
+        ]);
+
+        $this->get('/contact')->assertOk()
+            ->assertSee('src="https://www.google.com/maps/embed?pb=!1m18!1m12!3d0.34"', false)
+            ->assertDontSee('Get directions');
+    }
+
+    public function test_map_embed_only_accepts_google_maps_or_openstreetmap(): void
+    {
+        $this->assertSame('https://www.google.com/maps/embed?pb=abc', SiteSetting::extractMapEmbedUrl('https://www.google.com/maps/embed?pb=abc'));
+        $this->assertSame('https://www.openstreetmap.org/export/embed.html?bbox=1,2,3,4', SiteSetting::extractMapEmbedUrl("<iframe src='https://www.openstreetmap.org/export/embed.html?bbox=1,2,3,4'></iframe>"));
+        $this->assertNull(SiteSetting::extractMapEmbedUrl('<iframe src="https://evil.example.com/maps/embed?pb=x"></iframe>'));
+        $this->assertNull(SiteSetting::extractMapEmbedUrl('<iframe src="javascript:alert(1)"></iframe>'));
+        $this->assertNull(SiteSetting::extractMapEmbedUrl('http://www.google.com/maps/embed?pb=x'));
+        $this->assertNull(SiteSetting::extractMapEmbedUrl('https://www.google.com.evil.com/maps/embed?pb=x'));
+    }
+
+    public function test_admin_can_save_embed_code_and_only_the_url_is_stored(): void
+    {
+        $this->seed();
+        $this->actingAs(User::factory()->create()->assignRole('Admin'));
+
+        Livewire::test(ManageSiteSettings::class)
+            ->fillForm(['map_embed_url' => '<iframe src="https://evil.example.com/x"></iframe>'])
+            ->call('save')
+            ->assertHasFormErrors(['map_embed_url']);
+
+        Livewire::test(ManageSiteSettings::class)
+            ->fillForm(['map_embed_url' => '<iframe src="https://www.google.com/maps/embed?pb=ok" width="600"></iframe>'])
+            ->call('save')
+            ->assertHasNoFormErrors();
+
+        $this->assertSame('https://www.google.com/maps/embed?pb=ok', SiteSetting::query()->find(1)->map_embed_url);
     }
 
     public function test_map_location_is_url_encoded_so_it_cannot_break_out_of_the_iframe(): void

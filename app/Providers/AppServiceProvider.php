@@ -5,6 +5,10 @@ namespace App\Providers;
 use App\Models\Category;
 use App\Models\Page;
 use App\Models\SiteSetting;
+use Filament\Actions\CreateAction;
+use Filament\Actions\EditAction;
+use Filament\Actions\ViewAction;
+use Filament\Support\Enums\Width;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\URL;
@@ -30,6 +34,12 @@ class AppServiceProvider extends ServiceProvider
         // and block migrate:fresh / db:wipe style commands against the live database.
         URL::forceHttps($this->app->isProduction());
         DB::prohibitDestructiveCommands($this->app->isProduction());
+
+        // Admin pop-up forms: a comfortable default width instead of near full-screen.
+        // Resources with long forms (posts, events) set a wider size themselves.
+        foreach ([CreateAction::class, EditAction::class, ViewAction::class] as $action) {
+            $action::configureUsing(fn ($modalAction) => $modalAction->modalWidth(Width::TwoExtraLarge));
+        }
 
         View::composer(['layouts.public', 'public.*'], function ($view): void {
             $view->with('siteSettings', SiteSetting::current());

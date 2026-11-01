@@ -19,8 +19,11 @@ use Filament\Forms\Components\Select;
 use Filament\Forms\Components\Textarea;
 use Filament\Forms\Components\TextInput;
 use Filament\Resources\Resource;
+use Filament\Schemas\Components\Tabs;
+use Filament\Schemas\Components\Tabs\Tab;
 use Filament\Schemas\Components\Utilities\Set;
 use Filament\Schemas\Schema;
+use Filament\Support\Enums\Width;
 use Filament\Support\Icons\Heroicon;
 use Filament\Tables\Columns\TextColumn;
 use Filament\Tables\Filters\TernaryFilter;
@@ -39,24 +42,31 @@ class EventResource extends Resource
     public static function form(Schema $schema): Schema
     {
         return $schema
-            ->columns(2)
             ->components([
-                TextInput::make('title')->required()->maxLength(255)->live(onBlur: true)
-                    ->afterStateUpdated(fn (Set $set, ?string $state, string $operation) => $operation === 'create'
-                        ? $set('slug', Str::slug($state ?? '')) : null),
-                TextInput::make('slug')->required()->maxLength(255)->unique(ignoreRecord: true)
-                    ->rules(['regex:/^[a-z0-9]+(?:-[a-z0-9]+)*$/'])->prefix('/events/'),
-                DateTimePicker::make('starts_at')->label('Starts')->required()->seconds(false),
-                DateTimePicker::make('ends_at')->label('Ends')->seconds(false)->after('starts_at'),
-                TextInput::make('location')->maxLength(255)->placeholder('Venue and town, or leave empty if online only'),
-                self::url('online_url')->label('Online link')->placeholder('https://zoom.us/…'),
-                self::url('registration_url')->label('Registration link')->placeholder('https://…')
-                    ->helperText('Shows a "Register" button. Leave empty if registration is not needed.'),
-                Select::make('status')->options(['draft' => 'Draft', 'published' => 'Published'])->default('draft')->required(),
-                Textarea::make('summary')->rows(2)->maxLength(300)->columnSpanFull()
-                    ->helperText('One or two sentences shown on event cards.'),
-                FileUpload::make('image')->image()->disk('public')->directory('events')->visibility('public')->maxSize(5120)->columnSpanFull(),
-                RichEditor::make('body')->label('Details')->columnSpanFull(),
+                Tabs::make()->columnSpanFull()->tabs([
+                    Tab::make('Details')->icon(Heroicon::OutlinedPencilSquare)->schema([
+                        TextInput::make('title')->required()->maxLength(255)->live(onBlur: true)
+                            ->afterStateUpdated(fn (Set $set, ?string $state, string $operation) => $operation === 'create'
+                                ? $set('slug', Str::slug($state ?? '')) : null),
+                        Textarea::make('summary')->rows(2)->maxLength(300)
+                            ->helperText('One or two sentences shown on event cards.'),
+                        FileUpload::make('image')->image()->disk('public')->directory('events')->visibility('public')->maxSize(5120),
+                        RichEditor::make('body')->label('Full description'),
+                    ]),
+
+                    Tab::make('Date, place & publishing')->icon(Heroicon::OutlinedCalendarDays)->columns(2)->schema([
+                        DateTimePicker::make('starts_at')->label('Starts')->required()->seconds(false),
+                        DateTimePicker::make('ends_at')->label('Ends')->seconds(false)->after('starts_at'),
+                        TextInput::make('location')->maxLength(255)->placeholder('Venue and town')
+                            ->helperText('Leave empty if the event is online only.'),
+                        self::url('online_url')->label('Online link')->placeholder('https://zoom.us/…'),
+                        self::url('registration_url')->label('Registration link')->placeholder('https://…')
+                            ->helperText('Shows a "Register" button. Leave empty if not needed.'),
+                        Select::make('status')->options(['draft' => 'Draft', 'published' => 'Published'])->default('draft')->required(),
+                        TextInput::make('slug')->label('Address')->required()->maxLength(255)->unique(ignoreRecord: true)
+                            ->rules(['regex:/^[a-z0-9]+(?:-[a-z0-9]+)*$/'])->prefix('/events/')->columnSpanFull(),
+                    ]),
+                ]),
             ]);
     }
 
@@ -83,7 +93,7 @@ class EventResource extends Resource
                 Action::make('open')->label('Open')->icon(Heroicon::OutlinedArrowTopRightOnSquare)
                     ->url(fn (Event $record) => route('events.show', $record->slug), shouldOpenInNewTab: true)
                     ->visible(fn (Event $record) => $record->status === 'published'),
-                EditAction::make(),
+                EditAction::make()->modalWidth(Width::FourExtraLarge),
                 DeleteAction::make(),
             ])
             ->toolbarActions([
