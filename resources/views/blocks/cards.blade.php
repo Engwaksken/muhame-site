@@ -14,7 +14,7 @@
         @foreach (($data['cards'] ?? []) as $card)
             @php($cardImage = \App\Support\Media::url($card['image'] ?? null))
             @php($cardUrl = \App\Support\SafeUrl::clean($card['url'] ?? null))
-            <article class="group relative flex h-full flex-col overflow-hidden rounded-2xl border border-stone-200 bg-white transition hover:-translate-y-1 hover:shadow-lg">
+            <article class="group relative flex h-full flex-col overflow-hidden rounded-[10px] border border-t-0 border-stone-200 bg-white transition hover:-translate-y-1 hover:shadow-lg">
                 @if ($cardImage)
                     <div class="aspect-[16/10] overflow-hidden bg-stone-100">
                         <img src="{{ $cardImage }}" alt="" loading="lazy" class="h-full w-full object-cover transition duration-300 group-hover:scale-[1.03]">
@@ -23,7 +23,7 @@
                     <div class="h-1.5 bg-brand"></div>
                 @endif
                 <div class="flex flex-1 flex-col p-6">
-                    <h3 class="text-xl font-bold leading-snug text-stone-950">
+                    <h3 class="text-2xl font-bold leading-snug text-stone-950">
                         @if ($cardUrl)
                             <a href="{{ $cardUrl }}" class="after:absolute after:inset-0 group-hover:text-brand-dark" @if (\App\Support\SafeUrl::isExternal($cardUrl)) target="_blank" rel="noopener noreferrer" @endif>{{ $card['title'] ?? '' }}</a>
                         @else
@@ -31,7 +31,7 @@
                         @endif
                     </h3>
                     @if (filled($card['text'] ?? null))
-                        <p class="mt-3 leading-7 text-stone-600">{{ $card['text'] }}</p>
+                        <p class="mt-3 text-lg leading-8 text-stone-600">{{ $card['text'] }}</p>
                     @endif
                     @if ($cardUrl)
                         <span class="mt-auto inline-flex items-center gap-1 pt-5 font-semibold text-brand-dark">{{ filled($card['link_label'] ?? null) ? $card['link_label'] : 'Read more' }} <span aria-hidden="true">&rarr;</span></span>
