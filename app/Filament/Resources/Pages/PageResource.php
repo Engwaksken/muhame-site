@@ -2,7 +2,10 @@
 
 namespace App\Filament\Resources\Pages;
 
-use App\Filament\Resources\Pages\Pages\ManagePages;
+use App\Filament\Blocks\PageBlocks;
+use App\Filament\Resources\Pages\Pages\CreatePage;
+use App\Filament\Resources\Pages\Pages\EditPage;
+use App\Filament\Resources\Pages\Pages\ListPages;
 use App\Models\Page;
 use BackedEnum;
 use Filament\Actions\Action;
@@ -10,12 +13,16 @@ use Filament\Actions\BulkActionGroup;
 use Filament\Actions\DeleteAction;
 use Filament\Actions\DeleteBulkAction;
 use Filament\Actions\EditAction;
+use Filament\Forms\Components\FileUpload;
 use Filament\Forms\Components\RichEditor;
 use Filament\Forms\Components\Select;
 use Filament\Forms\Components\Textarea;
 use Filament\Forms\Components\TextInput;
 use Filament\Forms\Components\Toggle;
 use Filament\Resources\Resource;
+use Filament\Schemas\Components\Section;
+use Filament\Schemas\Components\Tabs;
+use Filament\Schemas\Components\Tabs\Tab;
 use Filament\Schemas\Components\Utilities\Set;
 use Filament\Schemas\Schema;
 use Filament\Support\Icons\Heroicon;
@@ -23,6 +30,7 @@ use Filament\Tables\Columns\IconColumn;
 use Filament\Tables\Columns\TextColumn;
 use Filament\Tables\Filters\SelectFilter;
 use Filament\Tables\Table;
+use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Support\Str;
 use Illuminate\Validation\Rule;
 
@@ -40,24 +48,50 @@ class PageResource extends Resource
     {
         return $schema
             ->components([
-                TextInput::make('title')->required()->maxLength(255)->live(onBlur: true)
-                    ->afterStateUpdated(fn (Set $set, ?string $state) => $set('slug', Str::slug($state ?? ''))),
-                TextInput::make('slug')->required()->maxLength(255)->unique(ignoreRecord: true)
-                    ->prefix(url('/').'/')
-                    ->rules(['regex:/^'.Page::SLUG_PATTERN.'$/', Rule::notIn(Page::RESERVED_SLUGS)])
-                    ->validationMessages([
-                        'regex' => 'Use lowercase letters, numbers and single hyphens only.',
-                        'not_in' => 'This address is already used by the site. Please choose another.',
+                Tabs::make()->columnSpanFull()->persistTabInQueryString()->tabs([
+                    Tab::make('Content')->icon(Heroicon::OutlinedPencilSquare)->schema([
+                        TextInput::make('title')->required()->maxLength(255)->live(onBlur: true)
+                            ->afterStateUpdated(fn (Set $set, ?string $state, string $operation) => $operation === 'create'
+                                ? $set('slug', Str::slug($state ?? '')) : null),
+                        Textarea::make('excerpt')->label('Introduction')->rows(2)->maxLength(300)
+                            ->helperText('Shown under the title at the top of the page, and on cards linking to it.'),
+                        FileUpload::make('hero_image')->label('Header image')->image()->disk('public')->directory('pages')
+                            ->visibility('public')->maxSize(5120)->helperText('Optional wide image at the top of the page.'),
+                        PageBlocks::builder(),
+                        RichEditor::make('body')->label('Simple page text')
+                            ->helperText('Optional. Shown only when the page has no sections above. Handy for plain pages like a privacy policy.'),
                     ]),
-                RichEditor::make('body')->required()->columnSpanFull(),
-                Select::make('status')->options(['draft' => 'Draft', 'published' => 'Published'])->default('draft')->required(),
-                Toggle::make('show_in_navigation')->label('Show in site menu'),
-                TextInput::make('navigation_order')->label('Menu order')->numeric()->minValue(0)->maxValue(999)->default(0)
-                    ->helperText('Lower numbers appear first.'),
-                TextInput::make('seo_title')->label('SEO title')->maxLength(255)->helperText('Leave blank to use the page title.'),
-                Textarea::make('seo_description')->label('SEO description')->maxLength(160)->rows(2)
-                    ->helperText('Up to 160 characters. Leave blank to use an excerpt.'),
-                Toggle::make('noindex')->label('Hide from search engines'),
+
+                    Tab::make('Publishing & menu')->icon(Heroicon::OutlinedBars3)->columns(2)->schema([
+                        Select::make('status')->options(['draft' => 'Draft', 'published' => 'Published'])->default('draft')->required(),
+                        TextInput::make('slug')->label('Address')->required()->maxLength(255)->unique(ignoreRecord: true)
+                            ->prefix(url('/').'/')
+                            ->rules(['regex:/^'.Page::SLUG_PATTERN.'$/', Rule::notIn(Page::RESERVED_SLUGS)])
+                            ->validationMessages([
+                                'regex' => 'Use lowercase letters, numbers and single hyphens only.',
+                                'not_in' => 'This address is already used by the site. Please choose another.',
+                            ]),
+                        Toggle::make('is_homepage')->label('Use as the homepage')
+                            ->helperText('Shown at the site root (/). Replaces the current homepage, if there is one.')->columnSpanFull(),
+                        Section::make('Site menu')->columns(3)->columnSpanFull()->schema([
+                            Toggle::make('show_in_navigation')->label('Show in site menu')->inline(false),
+                            Select::make('parent_id')->label('Appears under')->placeholder('Top level of the menu')
+                                ->relationship('parent', 'title', fn (Builder $query, ?Page $record) => $query
+                                    ->whereNull('parent_id')
+                                    ->when($record, fn (Builder $q) => $q->whereKeyNot($record->getKey())))
+                                ->helperText('Pick a parent to show this page in its dropdown.'),
+                            TextInput::make('navigation_order')->label('Menu order')->numeric()->minValue(0)->maxValue(999)->default(0)
+                                ->helperText('Lower numbers appear first.'),
+                        ]),
+                    ]),
+
+                    Tab::make('SEO')->icon(Heroicon::OutlinedMagnifyingGlass)->schema([
+                        TextInput::make('seo_title')->label('SEO title')->maxLength(255)->helperText('Leave blank to use the page title.'),
+                        Textarea::make('seo_description')->label('SEO description')->maxLength(160)->rows(2)
+                            ->helperText('Up to 160 characters. Leave blank to use the introduction.'),
+                        Toggle::make('noindex')->label('Hide from search engines'),
+                    ]),
+                ]),
             ]);
     }
 
@@ -66,20 +100,23 @@ class PageResource extends Resource
         return $table
             ->defaultSort('navigation_order')
             ->columns([
-                TextColumn::make('title')->searchable()->sortable(),
-                TextColumn::make('slug')->prefix('/')->searchable(),
+                TextColumn::make('title')->searchable()->sortable()
+                    ->description(fn (Page $record) => $record->parent ? 'Under: '.$record->parent->title : null),
+                TextColumn::make('slug')->label('Address')->prefix('/')->searchable(),
                 TextColumn::make('status')->badge()->sortable()
                     ->color(fn (string $state) => $state === 'published' ? 'success' : 'gray'),
+                IconColumn::make('is_homepage')->label('Home')->boolean()->trueIcon(Heroicon::OutlinedHome)->falseIcon(null),
                 IconColumn::make('show_in_navigation')->label('In menu')->boolean(),
                 TextColumn::make('navigation_order')->label('Order')->sortable(),
                 TextColumn::make('updated_at')->dateTime()->since()->sortable(),
             ])
+            ->modifyQueryUsing(fn (Builder $query) => $query->with('parent'))
             ->filters([
                 SelectFilter::make('status')->options(['draft' => 'Draft', 'published' => 'Published']),
             ])
             ->recordActions([
                 Action::make('open')->label('Open')->icon(Heroicon::OutlinedArrowTopRightOnSquare)
-                    ->url(fn (Page $record) => route('pages.show', $record->slug), shouldOpenInNewTab: true)
+                    ->url(fn (Page $record) => $record->url(), shouldOpenInNewTab: true)
                     ->visible(fn (Page $record) => $record->status === 'published'),
                 EditAction::make(),
                 DeleteAction::make(),
@@ -94,7 +131,9 @@ class PageResource extends Resource
     public static function getPages(): array
     {
         return [
-            'index' => ManagePages::route('/'),
+            'index' => ListPages::route('/'),
+            'create' => CreatePage::route('/create'),
+            'edit' => EditPage::route('/{record}/edit'),
         ];
     }
 }

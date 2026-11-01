@@ -6,12 +6,14 @@ use App\Filament\Resources\SiteSettings\Pages\ManageSiteSettings;
 use App\Models\SiteSetting;
 use BackedEnum;
 use Filament\Actions\EditAction;
+use Filament\Forms\Components\ColorPicker;
 use Filament\Forms\Components\FileUpload;
 use Filament\Forms\Components\KeyValue;
 use Filament\Forms\Components\Textarea;
 use Filament\Forms\Components\TextInput;
 use Filament\Infolists\Components\TextEntry;
 use Filament\Resources\Resource;
+use Filament\Schemas\Components\Section;
 use Filament\Schemas\Schema;
 use Filament\Support\Icons\Heroicon;
 use Filament\Tables\Columns\TextColumn;
@@ -67,6 +69,30 @@ class SiteSettingResource extends Resource
                     ->keyLabel('Network')->valueLabel('Profile URL')
                     ->keyPlaceholder('Instagram')->valuePlaceholder('https://…')
                     ->reorderable()->columnSpanFull(),
+
+                Section::make('Brand colours')->columns(2)->columnSpanFull()
+                    ->description('Used for buttons, links, banners and highlights across the public site. Text colour on top is picked automatically for readability.')
+                    ->schema([
+                        ColorPicker::make('primary_color')->label('Primary colour')->placeholder(SiteSetting::DEFAULT_PRIMARY)
+                            ->regex(SiteSetting::HEX_PATTERN)->helperText('Buttons, links and highlights.'),
+                        ColorPicker::make('accent_color')->label('Dark colour')->placeholder(SiteSetting::DEFAULT_ACCENT)
+                            ->regex(SiteSetting::HEX_PATTERN)->helperText('Footer and dark banners.'),
+                    ]),
+
+                Section::make('Footer')->columnSpanFull()->schema([
+                    Textarea::make('footer_text')->label('About text')->rows(3)->maxLength(500)
+                        ->helperText('A short description or address shown in the footer.'),
+                    KeyValue::make('footer_links')->label('Footer links')
+                        ->keyLabel('Link label')->valueLabel('URL or path')
+                        ->keyPlaceholder('Privacy policy')->valuePlaceholder('/privacy')
+                        ->reorderable(),
+                ]),
+
+                Section::make('Newsletter signup')->columns(2)->columnSpanFull()->schema([
+                    TextInput::make('newsletter_heading')->label('Heading')->maxLength(150)->placeholder('Stay in the loop'),
+                    TextInput::make('newsletter_text')->label('Text')->maxLength(300)
+                        ->placeholder('Get our latest insights and upcoming events in your inbox.'),
+                ]),
             ]);
     }
 

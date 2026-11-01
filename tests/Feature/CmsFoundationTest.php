@@ -117,8 +117,8 @@ class CmsFoundationTest extends TestCase
         Post::factory()->published()->create(['title' => 'Future story', 'published_at' => now()->addDay()]);
 
         $this->get('/')->assertOk()->assertSee('Public story')->assertDontSee('Private draft')->assertDontSee('Future story');
-        $this->get('/posts/'.$published->slug)->assertOk()->assertSee('Public story');
-        $this->get('/posts/private-draft')->assertNotFound();
+        $this->get('/insights/'.$published->slug)->assertOk()->assertSee('Public story');
+        $this->get('/insights/private-draft')->assertNotFound();
     }
 
     public function test_public_content_filters_by_category_and_tag_and_sanitizes_article_html(): void
@@ -134,7 +134,7 @@ class CmsFoundationTest extends TestCase
 
         $this->get('/categories/news')->assertOk()->assertSee('Tagged story');
         $this->get('/tags/laravel')->assertOk()->assertSee('Tagged story');
-        $this->get('/posts/tagged-story')->assertOk()->assertSee('<strong>content</strong>', false)->assertDontSee('<script>', false)->assertDontSee('alert("bad")');
+        $this->get('/insights/tagged-story')->assertOk()->assertSee('<strong>content</strong>', false)->assertDontSee('<script>', false)->assertDontSee('alert("bad")');
     }
 
     public function test_search_only_returns_published_content_and_sitemap_excludes_noindex_posts(): void
@@ -172,7 +172,7 @@ class CmsFoundationTest extends TestCase
             'noindex' => true,
         ]);
 
-        $this->get('/posts/'.$post->slug)
+        $this->get('/insights/'.$post->slug)
             ->assertOk()
             ->assertSee('A custom description')
             ->assertSee('noindex,follow')

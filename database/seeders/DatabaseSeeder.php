@@ -29,11 +29,15 @@ class DatabaseSeeder extends Seeder
             ->all();
         $pagePermissions = ['pages.viewAny', 'pages.create', 'pages.update', 'pages.delete'];
         $messagePermissions = ['messages.viewAny', 'messages.delete'];
+        $eventPermissions = ['events.viewAny', 'events.create', 'events.update', 'events.delete'];
+        $subscriberPermissions = ['subscribers.viewAny', 'subscribers.delete'];
         $allPermissions = array_merge(
             $postPermissions,
             $taxonomyPermissions,
             $pagePermissions,
             $messagePermissions,
+            $eventPermissions,
+            $subscriberPermissions,
             ['settings.viewAny', 'settings.update'],
         );
 
@@ -46,7 +50,7 @@ class DatabaseSeeder extends Seeder
         $roles = [
             'Super Admin' => $allPermissions,
             'Admin' => $allPermissions,
-            'Editor' => array_merge($postPermissions, ['categories.viewAny', 'categories.create', 'categories.update', 'tags.viewAny', 'tags.create', 'tags.update', 'pages.viewAny', 'pages.create', 'pages.update']),
+            'Editor' => array_merge($postPermissions, ['categories.viewAny', 'categories.create', 'categories.update', 'tags.viewAny', 'tags.create', 'tags.update', 'pages.viewAny', 'pages.create', 'pages.update'], $eventPermissions),
             'Author' => ['posts.viewAny', 'posts.view', 'posts.create', 'posts.update'],
             'Contributor' => ['posts.viewAny', 'posts.view', 'posts.create'],
             'Moderator' => ['posts.viewAny', 'posts.view', 'posts.update', 'posts.publish', 'categories.viewAny', 'tags.viewAny'],
@@ -59,5 +63,7 @@ class DatabaseSeeder extends Seeder
         }
 
         app(PermissionRegistrar::class)->forgetCachedPermissions();
+
+        $this->call(StarterHomepageSeeder::class);
     }
 }

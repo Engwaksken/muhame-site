@@ -35,15 +35,17 @@ class AppServiceProvider extends ServiceProvider
             $view->with('siteSettings', SiteSetting::current());
         });
 
-        View::composer('layouts.public', function ($view): void {
-            $view->with([
-                'navigationPages' => Page::query()->inNavigation()->get(['title', 'slug']),
+        // Menu data for the layout and the insights filters. once() keeps it to
+        // one set of queries per request, however many views use it.
+        View::composer(['layouts.public', 'public.*'], function ($view): void {
+            $view->with(once(fn () => [
+                'navigationPages' => Page::query()->inNavigation()->get(),
                 'navigationCategories' => Category::query()
                     ->whereHas('posts', fn (Builder $query) => $query->published())
                     ->orderBy('name')
-                    ->limit(6)
+                    ->limit(8)
                     ->get(),
-            ]);
+            ]));
         });
     }
 }

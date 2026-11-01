@@ -3,7 +3,7 @@
 namespace Tests\Feature;
 
 use App\Filament\Resources\ContactMessages\Pages\ManageContactMessages;
-use App\Filament\Resources\Pages\Pages\ManagePages;
+use App\Filament\Resources\Pages\Pages\CreatePage;
 use App\Mail\ContactMessageReceived;
 use App\Models\ContactMessage;
 use App\Models\Page;
@@ -163,13 +163,15 @@ class PagesAndContactTest extends TestCase
         $this->seed();
         $this->actingAs(User::factory()->create()->assignRole('Admin'));
 
-        Livewire::test(ManagePages::class)
-            ->callAction('create', data: ['title' => 'Admin', 'slug' => 'admin', 'body' => '<p>Nope</p>', 'status' => 'published'])
-            ->assertHasActionErrors(['slug']);
+        Livewire::test(CreatePage::class)
+            ->fillForm(['title' => 'Admin', 'slug' => 'admin', 'body' => '<p>Nope</p>', 'status' => 'published'])
+            ->call('create')
+            ->assertHasFormErrors(['slug']);
 
-        Livewire::test(ManagePages::class)
-            ->callAction('create', data: ['title' => 'About us', 'slug' => 'about-us', 'body' => '<p>Hello</p>', 'status' => 'published'])
-            ->assertHasNoActionErrors();
+        Livewire::test(CreatePage::class)
+            ->fillForm(['title' => 'About us', 'slug' => 'about-us', 'body' => '<p>Hello</p>', 'status' => 'published'])
+            ->call('create')
+            ->assertHasNoFormErrors();
 
         $this->assertDatabaseMissing('pages', ['slug' => 'admin']);
         $this->assertDatabaseHas('pages', ['slug' => 'about-us', 'status' => 'published']);

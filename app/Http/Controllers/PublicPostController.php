@@ -3,6 +3,7 @@
 namespace App\Http\Controllers;
 
 use App\Models\Category;
+use App\Models\Event;
 use App\Models\Page;
 use App\Models\Post;
 use App\Models\SiteSetting;
@@ -22,11 +23,12 @@ class PublicPostController extends Controller
         $isHomepage = request()->routeIs('home');
 
         return view('public.posts.index', [
-            'heading' => $isHomepage ? $settings->homepage_title : 'Latest stories',
+            'heading' => $isHomepage ? $settings->homepage_title : 'Insights',
             'description' => $isHomepage
                 ? $settings->homepage_description
-                : 'Ideas, updates, and perspectives from our team.',
-            'posts' => $this->publishedPosts()->paginate(12),        ]);
+                : 'Research, news and stories from our team.',
+            'posts' => $this->publishedPosts()->paginate(12),
+        ]);
     }
 
     public function search(Request $request): View
@@ -43,9 +45,10 @@ class PublicPostController extends Controller
 
         return view('public.posts.index', [
             'heading' => 'Search results',
-            'description' => "Stories matching “{$term}”.",
+            'description' => "Insights matching “{$term}”.",
             'posts' => $posts,
-            'searchQuery' => $term,        ]);
+            'searchQuery' => $term,
+        ]);
     }
 
     public function show(string $slug): View
@@ -57,7 +60,8 @@ class PublicPostController extends Controller
             'post' => $post,
             'seoTitle' => strip_tags($post->seo_title ?: $post->title),
             'safeBody' => $safeBody,
-            'description' => Str::limit(strip_tags($safeBody), 155),        ]);
+            'description' => Str::limit(strip_tags($safeBody), 155),
+        ]);
     }
 
     public function category(string $slug): View
@@ -67,9 +71,11 @@ class PublicPostController extends Controller
         return view('public.posts.index', [
             'heading' => $category->name,
             'description' => $category->description,
+            'activeCategory' => $category->slug,
             'posts' => $this->publishedPosts()
                 ->where('category_id', $category->id)
-                ->paginate(12),        ]);
+                ->paginate(12),
+        ]);
     }
 
     public function tag(string $slug): View
@@ -77,11 +83,12 @@ class PublicPostController extends Controller
         $tag = Tag::query()->where('slug', $slug)->firstOrFail();
 
         return view('public.posts.index', [
-            'heading' => "Stories tagged “{$tag->name}”",
+            'heading' => "Insights tagged “{$tag->name}”",
             'description' => null,
             'posts' => $this->publishedPosts()
                 ->whereHas('tags', fn (Builder $query) => $query->where('tags.id', $tag->id))
-                ->paginate(12),        ]);
+                ->paginate(12),
+        ]);
     }
 
     public function sitemap(): Response
@@ -89,12 +96,19 @@ class PublicPostController extends Controller
         $urls = [
             [route('home'), now()->toAtomString()],
             [route('posts.index'), now()->toAtomString()],
+            [route('events.index'), now()->toAtomString()],
             [route('contact'), now()->toAtomString()],
         ];
 
-        Page::query()->published()->where('noindex', false)->orderBy('slug')->get(['slug', 'updated_at'])
+        Page::query()->published()->where('noindex', false)->where('is_homepage', false)
+            ->orderBy('slug')->get(['slug', 'updated_at'])
             ->each(function (Page $page) use (&$urls): void {
                 $urls[] = [route('pages.show', $page->slug), $page->updated_at->toAtomString()];
+            });
+
+        Event::query()->published()->orderBy('slug')->get(['slug', 'updated_at'])
+            ->each(function (Event $event) use (&$urls): void {
+                $urls[] = [route('events.show', $event->slug), $event->updated_at->toAtomString()];
             });
 
         Post::query()->published()->where('noindex', false)->orderBy('slug')->get(['slug', 'updated_at'])
