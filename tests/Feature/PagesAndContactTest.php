@@ -108,6 +108,8 @@ class PagesAndContactTest extends TestCase
     {
         $this->get('/contact')->assertOk()
             ->assertSee('Send us a message')
+            ->assertSee('placeholder="you@example.com"', false)
+            ->assertSee('placeholder="Tell us how we can help…"', false)
             ->assertDontSee('aria-label="Contact details"', false)
             ->assertDontSee('<iframe', false)
             ->assertDontSee('Get directions');
