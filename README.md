@@ -12,7 +12,7 @@ The Muhame website and content management system, built with Laravel 13 and Fila
 
 - PHP 8.4+ with the `intl`, `mbstring`, `fileinfo`, `zip` and `pdo_mysql` extensions
 - Composer 2
-- Node.js 20+ and npm (only needed to build assets)
+- Node.js 20+ and npm (local machine only, to build assets; not needed on the server)
 - MySQL 8 or MariaDB 10.6+
 
 ## Local development
@@ -59,9 +59,11 @@ Run `php artisan key:generate` once on the first deploy, and never change the ke
 
 ### 2. Deploy steps
 
+The built front-end assets (`public/build`) are committed to git because the live server is shared hosting without Node.js. **Don't run npm on the server.** After changing anything in `resources/css` or `resources/js`, run `npm run build` locally and commit the updated `public/build`.
+
 ```bash
+git pull origin main
 composer install --no-dev --optimize-autoloader --no-interaction
-npm ci && npm run build
 php artisan migrate --force
 php artisan db:seed --force          # safe to re-run; syncs roles and permissions
 php artisan storage:link             # first deploy only
