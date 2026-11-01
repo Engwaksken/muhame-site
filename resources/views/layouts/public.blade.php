@@ -6,7 +6,7 @@
     $navLink = 'inline-flex items-center gap-1 rounded-md px-3 py-2 text-[0.95rem] font-semibold text-stone-800 hover:text-brand-dark focus-visible:outline-2 focus-visible:outline-brand';
 @endphp
 <!DOCTYPE html>
-<html lang="{{ str_replace('_', '-', app()->getLocale()) }}" style="--brand: {{ $brand }}; --brand-fg: {{ \App\Models\SiteSetting::readableTextOn($brand) }}; --ink: {{ $ink }}; --ink-fg: {{ \App\Models\SiteSetting::readableTextOn($ink) }}; --font-body: {{ \App\Models\SiteSetting::fontStack($siteSettings->bodyFontKey()) }}; --font-heading: {{ \App\Models\SiteSetting::fontStack($siteSettings->headingFontKey()) }}; font-size: {{ $siteSettings->baseFontSize() }};">
+<html lang="{{ str_replace('_', '-', app()->getLocale()) }}" style="--brand: {{ $brand }}; --brand-fg: {{ $siteSettings->primaryTextColor() }}; --ink: {{ $ink }}; --ink-fg: {{ \App\Models\SiteSetting::readableTextOn($ink) }}; --font-body: {{ \App\Models\SiteSetting::fontStack($siteSettings->bodyFontKey()) }}; --font-heading: {{ \App\Models\SiteSetting::fontStack($siteSettings->headingFontKey()) }}; font-size: {{ $siteSettings->baseFontSize() }};">
 <head>
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1">
@@ -34,11 +34,11 @@
     {{-- Header --}}
     <header class="sticky top-0 z-40 border-b border-stone-200 bg-white/95 backdrop-blur">
         <div class="mx-auto flex h-18 max-w-7xl items-center gap-6 px-5 sm:px-8">
-            <a href="{{ route('home') }}" class="flex shrink-0 items-center gap-3 text-xl font-bold tracking-tight text-stone-950">
-                @if ($logoUrl)
+            <a href="{{ route('home') }}" class="flex min-w-0 shrink-0 items-center gap-3 text-xl font-bold tracking-tight text-stone-950">
+                @if ($logoUrl && $siteSettings->headerShowsLogo())
                     <img src="{{ $logoUrl }}" alt="" class="max-h-11 max-w-44 object-contain">
                 @endif
-                <span @class(['sr-only' => $logoUrl])>{{ $siteSettings->site_name }}</span>
+                <span @class(['sr-only' => ! $siteSettings->headerShowsName(), 'truncate'])>{{ $siteSettings->site_name }}</span>
             </a>
 
             {{-- Desktop navigation --}}

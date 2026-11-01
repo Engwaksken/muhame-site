@@ -12,6 +12,7 @@ use Illuminate\Database\Eloquent\Model;
     'navigation_links', 'social_links', 'primary_color', 'accent_color', 'footer_text', 'footer_links',
     'newsletter_heading', 'newsletter_text', 'favicon_path', 'body_font', 'heading_font', 'base_font_size',
     'contact_phone', 'contact_address', 'office_hours', 'map_location', 'map_embed_url',
+    'header_display', 'primary_text_color',
 ])]
 class SiteSetting extends Model
 {
@@ -93,6 +94,37 @@ class SiteSetting extends Model
     public function accentColor(): string
     {
         return $this->validHex($this->accent_color) ?? self::DEFAULT_ACCENT;
+    }
+
+    public const HEADER_DISPLAY = ['logo_and_name' => 'Logo and site name', 'logo' => 'Logo only', 'name' => 'Site name only'];
+
+    public const PRIMARY_TEXT = ['white' => 'White', 'dark' => 'Dark', 'auto' => 'Automatic (best contrast)'];
+
+    /** Text colour on primary-coloured buttons and badges. White unless set otherwise. */
+    public function primaryTextColor(): string
+    {
+        return match ($this->primary_text_color) {
+            'dark' => '#111111',
+            'auto' => self::readableTextOn($this->primaryColor()),
+            default => '#FFFFFF',
+        };
+    }
+
+    /** Whether the header shows the logo (only possible when one is uploaded). */
+    public function headerShowsLogo(): bool
+    {
+        return filled($this->logo_path) && $this->header_display !== 'name';
+    }
+
+    /** Whether the header shows the site name as visible text. Always true without a logo. */
+    public function headerShowsName(): bool
+    {
+        if (! $this->headerShowsLogo()) {
+            return true;
+        }
+
+        // Default with a logo: logo only, unless "logo and name" is chosen.
+        return $this->header_display === 'logo_and_name';
     }
 
     /** Black or white, whichever is more readable on top of the given colour. */

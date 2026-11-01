@@ -170,6 +170,39 @@ class SiteRedesignTest extends TestCase
             ->assertDontSee('display:none', false);
     }
 
+    public function test_header_can_show_logo_and_name_logo_only_or_name_only(): void
+    {
+        $settings = SiteSetting::current();
+        $settings->update(['site_name' => 'Muhame Org', 'logo_path' => 'brand/logo.png']);
+        $logo = 'src="'.url('/storage/brand/logo.png').'"';
+
+        $settings->update(['header_display' => 'logo_and_name']);
+        $this->get('/contact')->assertSee($logo, false)->assertSee('<span class="truncate">Muhame Org</span>', false);
+
+        $settings->update(['header_display' => 'logo']);
+        $this->get('/contact')->assertSee($logo, false)->assertSee('<span class="sr-only truncate">Muhame Org</span>', false);
+
+        $settings->update(['header_display' => 'name']);
+        $this->get('/contact')->assertDontSee($logo, false)->assertSee('<span class="truncate">Muhame Org</span>', false);
+
+        // Without a logo, the name is always visible whatever the setting.
+        $settings->update(['header_display' => 'logo', 'logo_path' => null]);
+        $this->get('/contact')->assertSee('<span class="truncate">Muhame Org</span>', false);
+    }
+
+    public function test_primary_button_text_is_white_by_default_and_configurable(): void
+    {
+        $settings = SiteSetting::current();
+        $settings->update(['primary_color' => '#FFD60A']);
+        $this->get('/contact')->assertSee('--brand-fg: #FFFFFF', false);
+
+        $settings->update(['primary_text_color' => 'dark']);
+        $this->get('/contact')->assertSee('--brand-fg: #111111', false);
+
+        $settings->update(['primary_text_color' => 'auto']);
+        $this->get('/contact')->assertSee('--brand-fg: #111111', false);
+    }
+
     public function test_readable_text_colour_is_chosen_for_light_and_dark_brands(): void
     {
         $this->assertSame('#111111', SiteSetting::readableTextOn('#FFD60A'));

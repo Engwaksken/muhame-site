@@ -9,6 +9,7 @@ use Closure;
 use Filament\Forms\Components\ColorPicker;
 use Filament\Forms\Components\FileUpload;
 use Filament\Forms\Components\KeyValue;
+use Filament\Forms\Components\Radio;
 use Filament\Forms\Components\Select;
 use Filament\Forms\Components\Textarea;
 use Filament\Forms\Components\TextInput;
@@ -108,10 +109,16 @@ class SiteSettingResource extends Resource
                             FileUpload::make('favicon_path')->label('Favicon')->disk('public')->directory('brand')->visibility('public')
                                 ->acceptedFileTypes(['image/png', 'image/x-icon', 'image/vnd.microsoft.icon'])
                                 ->maxSize(512)->helperText('The small icon in browser tabs. A square PNG (at least 64×64) or ICO file.'),
+                            Radio::make('header_display')->label('Show in the header')->options(SiteSetting::HEADER_DISPLAY)
+                                ->default('logo')->formatStateUsing(fn (?string $state) => $state ?? 'logo')->inline()->columnSpanFull()
+                                ->helperText('Without a logo uploaded, the site name is always shown.'),
                         ]),
-                        Section::make('Colours')->columns(2)
-                            ->description('Used for buttons, links, banners and highlights. The text colour on top is picked automatically for readability.')
+                        Section::make('Colours')->columns(3)
+                            ->description('Used for buttons, links, banners and highlights.')
                             ->schema([
+                                Select::make('primary_text_color')->label('Text on primary colour')->options(SiteSetting::PRIMARY_TEXT)
+                                    ->selectablePlaceholder(false)->default('white')->formatStateUsing(fn (?string $state) => $state ?? 'white')
+                                    ->helperText('Text colour on buttons and banners in the primary colour.'),
                                 ColorPicker::make('primary_color')->label('Primary colour')->placeholder(SiteSetting::DEFAULT_PRIMARY)
                                     ->regex(SiteSetting::HEX_PATTERN)->helperText('Buttons, links and highlights.'),
                                 ColorPicker::make('accent_color')->label('Dark colour')->placeholder(SiteSetting::DEFAULT_ACCENT)
