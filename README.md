@@ -33,7 +33,7 @@ Run the tests with `composer test`, and check code style with `vendor/bin/pint`.
 
 ### 1. Environment
 
-Copy `.env.example` to `.env` on the server and set at least these values:
+Copy **`.env.production.example`** to `.env` on the server and replace every `CHANGE_ME` value. The key settings are:
 
 ```dotenv
 APP_NAME=Muhame
