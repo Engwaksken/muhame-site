@@ -38,7 +38,7 @@ class DatabaseSeeder extends Seeder
             $messagePermissions,
             $eventPermissions,
             $subscriberPermissions,
-            ['settings.viewAny', 'settings.update'],
+            ['settings.viewAny', 'settings.update', 'users.viewAny', 'users.create', 'users.update', 'users.delete', 'roles.viewAny', 'roles.create', 'roles.update', 'roles.delete', 'audit.viewAny'],
         );
 
         collect($allPermissions)

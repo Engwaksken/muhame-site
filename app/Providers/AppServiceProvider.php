@@ -2,9 +2,16 @@
 
 namespace App\Providers;
 
-use App\Models\Category;
-use App\Models\Page;
 use App\Models\SiteSetting;
+use App\Models\Category;
+use App\Models\ContactMessage;
+use App\Models\Event;
+use App\Models\Page;
+use App\Models\Post;
+use App\Models\Subscriber;
+use App\Models\Tag;
+use App\Models\User;
+use App\Observers\AuditObserver;
 use Filament\Actions\CreateAction;
 use Filament\Actions\EditAction;
 use Filament\Actions\ViewAction;
@@ -30,6 +37,10 @@ class AppServiceProvider extends ServiceProvider
      */
     public function boot(): void
     {
+        foreach ([Category::class, ContactMessage::class, Event::class, Page::class, Post::class, SiteSetting::class, Subscriber::class, Tag::class, User::class] as $model) {
+            $model::observe(AuditObserver::class);
+        }
+
         // Production hardening: generate https:// URLs behind proxies/load balancers
         // and block migrate:fresh / db:wipe style commands against the live database.
         URL::forceHttps($this->app->isProduction());
