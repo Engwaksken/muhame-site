@@ -16,9 +16,9 @@ use Illuminate\Database\Eloquent\Model;
 ])]
 class SiteSetting extends Model
 {
-    public const DEFAULT_PRIMARY = '#B45309';
+    public const DEFAULT_PRIMARY = '#1baa58';
 
-    public const DEFAULT_ACCENT = '#1C1917';
+    public const DEFAULT_ACCENT = '#4caa75';
 
     public const HEX_PATTERN = '/^#[0-9A-Fa-f]{6}$/';
 

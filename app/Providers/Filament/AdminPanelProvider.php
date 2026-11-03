@@ -3,6 +3,7 @@
 namespace App\Providers\Filament;
 
 use App\Filament\Auth\Registration;
+use App\Filament\Widgets\CmsStatsOverview;
 use App\Models\SiteSetting;
 use Filament\Http\Middleware\Authenticate;
 use Filament\Http\Middleware\AuthenticateSession;
@@ -32,7 +33,7 @@ class AdminPanelProvider extends PanelProvider
             ->registration(app()->environment('local') && config('cms.allow_registration') ? Registration::class : null)
             ->favicon(fn (): string => SiteSetting::current()->faviconUrl())
             ->colors([
-                'primary' => Color::Amber,
+                'primary' => Color::hex('#1baa58'),
             ])
             ->discoverResources(in: app_path('Filament/Resources'), for: 'App\Filament\Resources')
             ->discoverPages(in: app_path('Filament/Pages'), for: 'App\Filament\Pages')
@@ -41,6 +42,7 @@ class AdminPanelProvider extends PanelProvider
             ])
             ->discoverWidgets(in: app_path('Filament/Widgets'), for: 'App\Filament\Widgets')
             ->widgets([
+                CmsStatsOverview::class,
                 AccountWidget::class,
             ])
             ->middleware([

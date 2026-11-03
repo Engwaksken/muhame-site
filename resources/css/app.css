@@ -16,9 +16,14 @@
  * apply if they're missing.
  */
 :root {
-    --brand: #b45309;
+    --palette-color-1: #1baa58;
+    --palette-color-2: #ffffff;
+    --palette-color-3: #dbfbe3;
+    --palette-color-4: #4caa75;
+    --palette-color-5: #219a53;
+    --brand: var(--palette-color-1);
     --brand-fg: #ffffff;
-    --ink: #1c1917;
+    --ink: #219a53;
     --ink-fg: #ffffff;
     --font-body: 'Instrument Sans', ui-sans-serif, system-ui, sans-serif;
     --font-heading: var(--font-body);
