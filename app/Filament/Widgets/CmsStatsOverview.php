@@ -18,19 +18,15 @@ class CmsStatsOverview extends StatsOverviewWidget
         return [
             Stat::make('Published insights', Post::query()->published()->count())
                 ->description('Live articles on the site')
-                ->descriptionIcon('heroicon-m-document-text')
                 ->color('success'),
             Stat::make('Upcoming events', Event::query()->upcoming()->count())
                 ->description('Published events yet to finish')
-                ->descriptionIcon('heroicon-m-calendar-days')
                 ->color('success'),
             Stat::make('Published pages', Page::query()->where('status', 'published')->count())
                 ->description('Public pages')
-                ->descriptionIcon('heroicon-m-rectangle-stack')
                 ->color('success'),
             Stat::make('Subscribers', Subscriber::query()->count())
                 ->description('Newsletter subscribers')
-                ->descriptionIcon('heroicon-m-envelope')
                 ->color('success'),
         ];
     }

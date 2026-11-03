@@ -7,6 +7,7 @@ use App\Filament\Resources\Pages\Pages\CreatePage;
 use App\Filament\Resources\Pages\Pages\EditPage;
 use App\Filament\Resources\Pages\Pages\ListPages;
 use App\Models\Page;
+use App\Support\FaIcon;
 use BackedEnum;
 use Filament\Actions\Action;
 use Filament\Actions\BulkActionGroup;
@@ -26,7 +27,6 @@ use Filament\Schemas\Components\Tabs\Tab;
 use Filament\Schemas\Components\Utilities\Get;
 use Filament\Schemas\Components\Utilities\Set;
 use Filament\Schemas\Schema;
-use Filament\Support\Icons\Heroicon;
 use Filament\Tables\Columns\IconColumn;
 use Filament\Tables\Columns\TextColumn;
 use Filament\Tables\Filters\SelectFilter;
@@ -41,7 +41,7 @@ class PageResource extends Resource
 
     protected static string|\UnitEnum|null $navigationGroup = 'Site';
 
-    protected static string|BackedEnum|null $navigationIcon = Heroicon::OutlinedDocumentText;
+    public static function getNavigationIcon(): \Illuminate\Contracts\Support\Htmlable { return FaIcon::make('fa-file-lines'); }
 
     protected static ?int $navigationSort = 1;
 
@@ -50,7 +50,7 @@ class PageResource extends Resource
         return $schema
             ->components([
                 Tabs::make()->columnSpanFull()->persistTabInQueryString()->tabs([
-                    Tab::make('Page header')->icon(Heroicon::OutlinedPencilSquare)->columns(2)->schema([
+                    Tab::make('Page header')->icon(FaIcon::make('fa-pen-to-square'))->columns(2)->schema([
                         TextInput::make('title')->required()->maxLength(255)->live(onBlur: true)
                             ->afterStateUpdated(fn (Set $set, ?string $state, string $operation) => $operation === 'create'
                                 ? $set('slug', Str::slug($state ?? '')) : null),
@@ -61,18 +61,18 @@ class PageResource extends Resource
                             ->helperText('Optional wide image at the top of the page. Not shown when the page starts with a Hero banner section.'),
                     ]),
 
-                    Tab::make('Sections')->icon(Heroicon::OutlinedSquares2x2)
+                    Tab::make('Sections')->icon(FaIcon::make('fa-table-cells-large'))
                         ->badge(fn (Get $get) => count($get('blocks') ?? []) ?: null)
                         ->schema([
                             PageBlocks::builder()->collapsed(),
                         ]),
 
-                    Tab::make('Simple text')->icon(Heroicon::OutlinedDocumentText)->schema([
+                    Tab::make('Simple text')->icon(FaIcon::make('fa-file-lines'))->schema([
                         RichEditor::make('body')->hiddenLabel()
                             ->helperText('Optional. Shown only when the page has no sections. Handy for plain pages like a privacy policy.'),
                     ]),
 
-                    Tab::make('Publishing & menu')->icon(Heroicon::OutlinedBars3)->columns(2)->schema([
+                    Tab::make('Publishing & menu')->icon(FaIcon::make('fa-bars'))->columns(2)->schema([
                         Select::make('status')->options(['draft' => 'Draft', 'published' => 'Published'])->default('draft')->required(),
                         TextInput::make('slug')->label('Address')->required()->maxLength(255)->unique(ignoreRecord: true)
                             ->prefix(url('/').'/')
@@ -95,7 +95,7 @@ class PageResource extends Resource
                         ]),
                     ]),
 
-                    Tab::make('SEO')->icon(Heroicon::OutlinedMagnifyingGlass)->schema([
+                    Tab::make('SEO')->icon(FaIcon::make('fa-magnifying-glass'))->schema([
                         TextInput::make('seo_title')->label('SEO title')->maxLength(255)->helperText('Leave blank to use the page title.'),
                         Textarea::make('seo_description')->label('SEO description')->maxLength(160)->rows(2)
                             ->helperText('Up to 160 characters. Leave blank to use the introduction.'),
@@ -115,7 +115,7 @@ class PageResource extends Resource
                 TextColumn::make('slug')->label('Address')->prefix('/')->searchable(),
                 TextColumn::make('status')->badge()->sortable()
                     ->color(fn (string $state) => $state === 'published' ? 'success' : 'gray'),
-                IconColumn::make('is_homepage')->label('Home')->boolean()->trueIcon(Heroicon::OutlinedHome)->falseIcon(null),
+                IconColumn::make('is_homepage')->label('Home')->boolean()->trueIcon(FaIcon::make('fa-house'))->falseIcon(null),
                 IconColumn::make('show_in_navigation')->label('In menu')->boolean(),
                 TextColumn::make('navigation_order')->label('Order')->sortable(),
                 TextColumn::make('updated_at')->dateTime()->since()->sortable(),
@@ -125,7 +125,7 @@ class PageResource extends Resource
                 SelectFilter::make('status')->options(['draft' => 'Draft', 'published' => 'Published']),
             ])
             ->recordActions([
-                Action::make('open')->label('Open')->icon(Heroicon::OutlinedArrowTopRightOnSquare)
+                Action::make('open')->label('Open')->icon(FaIcon::make('fa-arrow-up-right-from-square'))
                     ->url(fn (Page $record) => $record->url(), shouldOpenInNewTab: true)
                     ->visible(fn (Page $record) => $record->status === 'published'),
                 EditAction::make(),

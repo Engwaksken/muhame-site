@@ -4,6 +4,7 @@ namespace App\Filament\Resources\Users;
 
 use App\Filament\Resources\Users\Pages\ManageUsers;
 use App\Models\User;
+use App\Support\FaIcon;
 use Filament\Forms\Components\Select;
 use Filament\Forms\Components\TextInput;
 use Filament\Resources\Resource;
@@ -17,6 +18,8 @@ class UserResource extends Resource
     protected static ?string $model = User::class;
     protected static string|\UnitEnum|null $navigationGroup = 'Administration';
     protected static ?string $navigationLabel = 'Users';
+
+    public static function getNavigationIcon(): \Illuminate\Contracts\Support\Htmlable { return FaIcon::make('fa-users-gear'); }
 
     public static function canViewAny(): bool { return auth()->user()?->can('users.viewAny') ?? false; }
     public static function canCreate(): bool { return auth()->user()?->can('users.create') ?? false; }

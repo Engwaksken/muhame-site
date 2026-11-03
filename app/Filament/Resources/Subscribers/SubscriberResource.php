@@ -4,12 +4,12 @@ namespace App\Filament\Resources\Subscribers;
 
 use App\Filament\Resources\Subscribers\Pages\ManageSubscribers;
 use App\Models\Subscriber;
+use App\Support\FaIcon;
 use BackedEnum;
 use Filament\Actions\BulkActionGroup;
 use Filament\Actions\DeleteAction;
 use Filament\Actions\DeleteBulkAction;
 use Filament\Resources\Resource;
-use Filament\Support\Icons\Heroicon;
 use Filament\Tables\Columns\TextColumn;
 use Filament\Tables\Table;
 
@@ -21,7 +21,7 @@ class SubscriberResource extends Resource
 
     protected static string|\UnitEnum|null $navigationGroup = 'Site';
 
-    protected static string|BackedEnum|null $navigationIcon = Heroicon::OutlinedUserGroup;
+    public static function getNavigationIcon(): \Illuminate\Contracts\Support\Htmlable { return FaIcon::make('fa-users'); }
 
     protected static ?int $navigationSort = 3;
 

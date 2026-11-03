@@ -3,6 +3,7 @@
 namespace App\Filament\Resources\Roles;
 
 use App\Filament\Resources\Roles\Pages\ManageRoles;
+use App\Support\FaIcon;
 use Filament\Forms\Components\CheckboxList;
 use Filament\Forms\Components\TextInput;
 use Filament\Resources\Resource;
@@ -16,6 +17,8 @@ class RoleResource extends Resource
     protected static ?string $model = Role::class;
     protected static string|\UnitEnum|null $navigationGroup = 'Administration';
     protected static ?string $navigationLabel = 'Roles & permissions';
+
+    public static function getNavigationIcon(): \Illuminate\Contracts\Support\Htmlable { return FaIcon::make('fa-shield-halved'); }
 
     public static function canViewAny(): bool { return auth()->user()?->can('roles.viewAny') ?? false; }
     public static function canCreate(): bool { return auth()->user()?->can('roles.create') ?? false; }

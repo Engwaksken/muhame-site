@@ -4,6 +4,7 @@ namespace App\Filament\Resources\SiteSettings;
 
 use App\Filament\Resources\SiteSettings\Pages\ManageSiteSettings;
 use App\Models\SiteSetting;
+use App\Support\FaIcon;
 use BackedEnum;
 use Closure;
 use Filament\Forms\Components\ColorPicker;
@@ -18,7 +19,6 @@ use Filament\Schemas\Components\Section;
 use Filament\Schemas\Components\Tabs;
 use Filament\Schemas\Components\Tabs\Tab;
 use Filament\Schemas\Schema;
-use Filament\Support\Icons\Heroicon;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Model;
 
@@ -32,7 +32,7 @@ class SiteSettingResource extends Resource
 
     protected static string|\UnitEnum|null $navigationGroup = 'Site';
 
-    protected static string|BackedEnum|null $navigationIcon = Heroicon::OutlinedCog6Tooth;
+    public static function getNavigationIcon(): \Illuminate\Contracts\Support\Htmlable { return FaIcon::make('fa-gear'); }
 
     protected static ?int $navigationSort = 10;
 
@@ -65,7 +65,7 @@ class SiteSettingResource extends Resource
         return $schema
             ->components([
                 Tabs::make('Settings')->columnSpanFull()->persistTabInQueryString()->tabs([
-                    Tab::make('General')->icon(Heroicon::OutlinedHome)->columns(2)->schema([
+                    Tab::make('General')->icon(FaIcon::make('fa-house'))->columns(2)->schema([
                         TextInput::make('site_name')->required()->maxLength(100),
                         TextInput::make('tagline')->maxLength(180)->helperText('Shown in the footer and search results.'),
                         Section::make('Homepage fallback')->columnSpanFull()->collapsed()
@@ -76,7 +76,7 @@ class SiteSettingResource extends Resource
                             ]),
                     ]),
 
-                    Tab::make('Contact & map')->icon(Heroicon::OutlinedMapPin)->columns(2)->schema([
+                    Tab::make('Contact & map')->icon(FaIcon::make('fa-location-dot'))->columns(2)->schema([
                         TextInput::make('contact_email')->label('Email')->email()->maxLength(255)
                             ->helperText('Contact form messages are sent here. Also shown on the contact page and in the footer.'),
                         TextInput::make('contact_phone')->label('Phone')->tel()->maxLength(40)->placeholder('+256 700 000 000'),
@@ -102,7 +102,7 @@ class SiteSettingResource extends Resource
                             ]),
                     ]),
 
-                    Tab::make('Branding')->icon(Heroicon::OutlinedSwatch)->schema([
+                    Tab::make('Branding')->icon(FaIcon::make('fa-palette'))->schema([
                         Section::make('Logo & favicon')->columns(2)->schema([
                             FileUpload::make('logo_path')->label('Logo')->image()->disk('public')->directory('brand')
                                 ->visibility('public')->maxSize(2048)->helperText('Shown in the header. PNG or SVG with a transparent background works best.'),
@@ -137,7 +137,7 @@ class SiteSettingResource extends Resource
                             ]),
                     ]),
 
-                    Tab::make('Menu')->icon(Heroicon::OutlinedBars3)->schema([
+                    Tab::make('Menu')->icon(FaIcon::make('fa-bars'))->schema([
                         KeyValue::make('navigation_links')->label('Extra menu links')
                             ->helperText('Pages marked "Show in site menu" appear automatically. Add other links here, e.g. to a partner site.')
                             ->keyLabel('Link label')->valueLabel('URL or path')
@@ -145,7 +145,7 @@ class SiteSettingResource extends Resource
                             ->reorderable(),
                     ]),
 
-                    Tab::make('Footer & social')->icon(Heroicon::OutlinedRectangleGroup)->schema([
+                    Tab::make('Footer & social')->icon(FaIcon::make('fa-layer-group'))->schema([
                         Textarea::make('footer_text')->label('Footer about text')->rows(3)->maxLength(500)
                             ->helperText('A short description or address shown in the footer.'),
                         KeyValue::make('footer_links')->label('Footer links')
@@ -158,7 +158,7 @@ class SiteSettingResource extends Resource
                             ->reorderable(),
                     ]),
 
-                    Tab::make('Newsletter')->icon(Heroicon::OutlinedEnvelope)->columns(2)->schema([
+                    Tab::make('Newsletter')->icon(FaIcon::make('fa-envelope'))->columns(2)->schema([
                         TextInput::make('newsletter_heading')->label('Heading')->maxLength(150)->placeholder('Stay in the loop'),
                         TextInput::make('newsletter_text')->label('Text')->maxLength(300)
                             ->placeholder('Get our latest insights and upcoming events in your inbox.'),

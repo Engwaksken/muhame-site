@@ -4,6 +4,7 @@ namespace App\Filament\Resources\Categories;
 
 use App\Filament\Resources\Categories\Pages\ManageCategories;
 use App\Models\Category;
+use App\Support\FaIcon;
 use BackedEnum;
 use Filament\Actions\BulkActionGroup;
 use Filament\Actions\DeleteAction;
@@ -16,7 +17,6 @@ use Filament\Infolists\Components\TextEntry;
 use Filament\Resources\Resource;
 use Filament\Schemas\Components\Utilities\Set;
 use Filament\Schemas\Schema;
-use Filament\Support\Icons\Heroicon;
 use Filament\Tables\Columns\TextColumn;
 use Filament\Tables\Table;
 use Illuminate\Support\Str;
@@ -27,7 +27,7 @@ class CategoryResource extends Resource
 
     protected static string|\UnitEnum|null $navigationGroup = 'Content';
 
-    protected static string|BackedEnum|null $navigationIcon = Heroicon::OutlinedRectangleStack;
+    public static function getNavigationIcon(): \Illuminate\Contracts\Support\Htmlable { return FaIcon::make('fa-folder-open'); }
 
     public static function form(Schema $schema): Schema
     {

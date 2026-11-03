@@ -3,10 +3,10 @@
 namespace App\Filament\Resources\Subscribers\Pages;
 
 use App\Filament\Resources\Subscribers\SubscriberResource;
+use App\Support\FaIcon;
 use App\Models\Subscriber;
 use Filament\Actions\Action;
 use Filament\Resources\Pages\ManageRecords;
-use Filament\Support\Icons\Heroicon;
 use Symfony\Component\HttpFoundation\StreamedResponse;
 
 class ManageSubscribers extends ManageRecords
@@ -16,7 +16,7 @@ class ManageSubscribers extends ManageRecords
     protected function getHeaderActions(): array
     {
         return [
-            Action::make('exportCsv')->label('Download CSV')->icon(Heroicon::OutlinedArrowDownTray)
+            Action::make('exportCsv')->label('Download CSV')->icon(FaIcon::make('fa-download'))
                 ->action(fn (): StreamedResponse => response()->streamDownload(function (): void {
                     $out = fopen('php://output', 'w');
                     fputcsv($out, ['email', 'name', 'subscribed_at']);

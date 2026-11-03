@@ -4,6 +4,7 @@ namespace App\Filament\Resources\AuditLogs;
 
 use App\Filament\Resources\AuditLogs\Pages\ListAuditLogs;
 use App\Models\AuditLog;
+use App\Support\FaIcon;
 use Filament\Infolists\Components\TextEntry;
 use Filament\Resources\Resource;
 use Filament\Schemas\Schema;
@@ -16,6 +17,8 @@ class AuditLogResource extends Resource
     protected static string|\UnitEnum|null $navigationGroup = 'Administration';
     protected static ?string $navigationLabel = 'Audit log';
     protected static ?string $modelLabel = 'audit entry';
+
+    public static function getNavigationIcon(): \Illuminate\Contracts\Support\Htmlable { return FaIcon::make('fa-clipboard-list'); }
 
     public static function canViewAny(): bool { return auth()->user()?->can('audit.viewAny') ?? false; }
     public static function canCreate(): bool { return false; }

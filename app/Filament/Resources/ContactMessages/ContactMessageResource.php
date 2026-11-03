@@ -4,6 +4,7 @@ namespace App\Filament\Resources\ContactMessages;
 
 use App\Filament\Resources\ContactMessages\Pages\ManageContactMessages;
 use App\Models\ContactMessage;
+use App\Support\FaIcon;
 use BackedEnum;
 use Filament\Actions\Action;
 use Filament\Actions\BulkActionGroup;
@@ -13,7 +14,6 @@ use Filament\Actions\ViewAction;
 use Filament\Infolists\Components\TextEntry;
 use Filament\Resources\Resource;
 use Filament\Schemas\Schema;
-use Filament\Support\Icons\Heroicon;
 use Filament\Tables\Columns\TextColumn;
 use Filament\Tables\Filters\TernaryFilter;
 use Filament\Tables\Table;
@@ -29,7 +29,7 @@ class ContactMessageResource extends Resource
 
     protected static string|\UnitEnum|null $navigationGroup = 'Site';
 
-    protected static string|BackedEnum|null $navigationIcon = Heroicon::OutlinedInbox;
+    public static function getNavigationIcon(): \Illuminate\Contracts\Support\Htmlable { return FaIcon::make('fa-inbox'); }
 
     protected static ?int $navigationSort = 2;
 
@@ -79,10 +79,10 @@ class ContactMessageResource extends Resource
             ])
             ->recordActions([
                 ViewAction::make(),
-                Action::make('markRead')->label('Mark as read')->icon(Heroicon::OutlinedCheck)
+                Action::make('markRead')->label('Mark as read')->icon(FaIcon::make('fa-check'))
                     ->visible(fn (ContactMessage $record) => ! $record->read_at)
                     ->action(fn (ContactMessage $record) => $record->markAsRead()),
-                Action::make('reply')->label('Reply')->icon(Heroicon::OutlinedEnvelope)
+                Action::make('reply')->label('Reply')->icon(FaIcon::make('fa-envelope'))
                     ->url(fn (ContactMessage $record) => 'mailto:'.$record->email.'?subject='.rawurlencode('Re: '.($record->subject ?: 'Your message'))),
                 DeleteAction::make(),
             ])

@@ -5,6 +5,7 @@ namespace App\Filament\Resources\Events;
 use App\Filament\Resources\Events\Pages\ManageEvents;
 use App\Models\Event;
 use App\Support\SafeUrl;
+use App\Support\FaIcon;
 use BackedEnum;
 use Closure;
 use Filament\Actions\Action;
@@ -24,7 +25,6 @@ use Filament\Schemas\Components\Tabs\Tab;
 use Filament\Schemas\Components\Utilities\Set;
 use Filament\Schemas\Schema;
 use Filament\Support\Enums\Width;
-use Filament\Support\Icons\Heroicon;
 use Filament\Tables\Columns\TextColumn;
 use Filament\Tables\Filters\TernaryFilter;
 use Filament\Tables\Table;
@@ -37,14 +37,14 @@ class EventResource extends Resource
 
     protected static string|\UnitEnum|null $navigationGroup = 'Content';
 
-    protected static string|BackedEnum|null $navigationIcon = Heroicon::OutlinedCalendarDays;
+    public static function getNavigationIcon(): \Illuminate\Contracts\Support\Htmlable { return FaIcon::make('fa-calendar-days'); }
 
     public static function form(Schema $schema): Schema
     {
         return $schema
             ->components([
                 Tabs::make()->columnSpanFull()->tabs([
-                    Tab::make('Details')->icon(Heroicon::OutlinedPencilSquare)->schema([
+                    Tab::make('Details')->icon(FaIcon::make('fa-pen-to-square'))->schema([
                         TextInput::make('title')->required()->maxLength(255)->live(onBlur: true)
                             ->afterStateUpdated(fn (Set $set, ?string $state, string $operation) => $operation === 'create'
                                 ? $set('slug', Str::slug($state ?? '')) : null),
@@ -54,7 +54,7 @@ class EventResource extends Resource
                         RichEditor::make('body')->label('Full description'),
                     ]),
 
-                    Tab::make('Date, place & publishing')->icon(Heroicon::OutlinedCalendarDays)->columns(2)->schema([
+                    Tab::make('Date, place & publishing')->icon(FaIcon::make('fa-calendar-days'))->columns(2)->schema([
                         DateTimePicker::make('starts_at')->label('Starts')->required()->seconds(false),
                         DateTimePicker::make('ends_at')->label('Ends')->seconds(false)->after('starts_at'),
                         TextInput::make('location')->maxLength(255)->placeholder('Venue and town')
@@ -90,7 +90,7 @@ class EventResource extends Resource
                     ),
             ])
             ->recordActions([
-                Action::make('open')->label('Open')->icon(Heroicon::OutlinedArrowTopRightOnSquare)
+                Action::make('open')->label('Open')->icon(FaIcon::make('fa-arrow-up-right-from-square'))
                     ->url(fn (Event $record) => route('events.show', $record->slug), shouldOpenInNewTab: true)
                     ->visible(fn (Event $record) => $record->status === 'published'),
                 EditAction::make()->modalWidth(Width::FourExtraLarge),

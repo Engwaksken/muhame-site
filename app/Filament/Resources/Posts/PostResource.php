@@ -4,6 +4,7 @@ namespace App\Filament\Resources\Posts;
 
 use App\Filament\Resources\Posts\Pages\ManagePosts;
 use App\Models\Post;
+use App\Support\FaIcon;
 use BackedEnum;
 use Filament\Actions\BulkActionGroup;
 use Filament\Actions\DeleteAction;
@@ -23,7 +24,6 @@ use Filament\Schemas\Components\Tabs\Tab;
 use Filament\Schemas\Components\Utilities\Set;
 use Filament\Schemas\Schema;
 use Filament\Support\Enums\Width;
-use Filament\Support\Icons\Heroicon;
 use Filament\Tables\Columns\ImageColumn;
 use Filament\Tables\Columns\TextColumn;
 use Filament\Tables\Filters\SelectFilter;
@@ -35,7 +35,7 @@ class PostResource extends Resource
 {
     protected static ?string $model = Post::class;
 
-    protected static string|BackedEnum|null $navigationIcon = Heroicon::OutlinedRectangleStack;
+    public static function getNavigationIcon(): \Illuminate\Contracts\Support\Htmlable { return FaIcon::make('fa-newspaper'); }
 
     protected static string|\UnitEnum|null $navigationGroup = 'Content';
 
@@ -66,14 +66,14 @@ class PostResource extends Resource
         return $schema
             ->components([
                 Tabs::make()->columnSpanFull()->tabs([
-                    Tab::make('Content')->icon(Heroicon::OutlinedPencilSquare)->schema([
+                    Tab::make('Content')->icon(FaIcon::make('fa-pen-to-square'))->schema([
                         TextInput::make('title')->required()->maxLength(255)->live(onBlur: true)
                             ->afterStateUpdated(fn (Set $set, ?string $state, string $operation) => $operation === 'create'
                                 ? $set('slug', Str::slug($state ?? '')) : null),
                         RichEditor::make('body')->required(),
                     ]),
 
-                    Tab::make('Image & category')->icon(Heroicon::OutlinedPhoto)->columns(2)->schema([
+                    Tab::make('Image & category')->icon(FaIcon::make('fa-image'))->columns(2)->schema([
                         FileUpload::make('featured_image')->label('Featured image')->image()->disk('public')->directory('posts')
                             ->visibility('public')->maxSize(5120)->columnSpanFull()
                             ->helperText('Shown on insight cards and at the top of the post.'),
@@ -82,7 +82,7 @@ class PostResource extends Resource
                         Select::make('tags')->relationship('tags', 'name')->multiple()->searchable()->preload(),
                     ]),
 
-                    Tab::make('Publishing & SEO')->icon(Heroicon::OutlinedGlobeAlt)->columns(2)->schema([
+                    Tab::make('Publishing & SEO')->icon(FaIcon::make('fa-globe'))->columns(2)->schema([
                         Select::make('status')->options(['draft' => 'Draft', 'published' => 'Published'])
                             ->default('draft')->required()->visible(fn () => auth()->user()?->can('posts.publish') ?? false),
                         TextInput::make('slug')->label('Address')->required()->maxLength(255)->unique(ignoreRecord: true)
