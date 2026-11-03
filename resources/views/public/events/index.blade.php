@@ -33,7 +33,7 @@
                     @if ($showPast)
                         Check back after our first event.
                     @else
-                        Check back soon, or <a href="#newsletter" class="font-semibold text-brand-dark underline">sign up for updates</a>.
+                        Check back soon, or <a href="#newsletter" class="font-semibold text-brand-dark">sign up for updates</a>.
                     @endif
                 </p>
             </div>

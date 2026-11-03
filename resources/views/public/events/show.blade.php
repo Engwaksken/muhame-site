@@ -16,7 +16,7 @@
     <header class="bg-brand-soft">
         <div class="mx-auto max-w-5xl px-5 py-14 sm:px-8 sm:py-20">
             <nav aria-label="Breadcrumb" class="text-sm font-semibold">
-                <a href="{{ route('events.index') }}" class="text-brand-dark hover:underline">Events</a>
+                <a href="{{ route('events.index') }}" class="text-brand-dark">Events</a>
             </nav>
             @if ($isPast)
                 <p class="mt-5 inline-block rounded-full bg-stone-200 px-3 py-1 text-xs font-bold uppercase tracking-wider text-stone-700">Past event</p>

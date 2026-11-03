@@ -59,7 +59,7 @@ h1, h2, h3, h4, h5, h6 {
 .rich-content ul { list-style: disc; }
 .rich-content ol { list-style: decimal; }
 .rich-content blockquote { border-left: 3px solid var(--brand); padding-left: 1rem; color: #57534e; font-style: italic; }
-.rich-content a { color: var(--color-brand-dark); text-decoration: underline; text-underline-offset: 3px; }
+.rich-content a { color: var(--color-brand-dark); text-decoration: none; }
 .rich-content pre { overflow-x: auto; border-radius: .75rem; background: #292524; padding: 1rem; color: #fafaf9; }
 .rich-content code { border-radius: .25rem; background: #f5f5f4; padding: .125rem .3rem; }
 .rich-content pre code { background: transparent; padding: 0; }

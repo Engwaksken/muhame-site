@@ -7,8 +7,17 @@
     "file": "assets/fa-solid-900-IAB4Droh.woff2",
     "src": "node_modules/@fortawesome/fontawesome-free/webfonts/fa-solid-900.woff2"
   },
+  "resources/css/admin-fontawesome.css": {
+    "file": "assets/admin-fontawesome-BKBDgcyj.css",
+    "src": "resources/css/admin-fontawesome.css",
+    "isEntry": true,
+    "name": "admin-fontawesome",
+    "names": [
+      "admin-fontawesome.css"
+    ]
+  },
   "resources/css/app.css": {
-    "file": "assets/app-Bmjx3h2H.css",
+    "file": "assets/app-tWXO4ltW.css",
     "src": "resources/css/app.css",
     "isEntry": true,
     "name": "app",

@@ -109,7 +109,7 @@
             @if ($hasSidebar)
                 <aside class="flex flex-col gap-6 lg:col-span-5">
                     @if ($details || $socialLinks)
-                        <div class="rounded-2xl bg-ink p-6 text-ink-fg sm:p-8">
+                        <div class="rounded-2xl bg-ink p-6 text-white sm:p-8">
                             <h2 class="text-xl font-bold">Contact information</h2>
 
                             @if ($details)
@@ -122,7 +122,7 @@
                                             <div class="min-w-0">
                                                 <h3 class="text-xs font-semibold uppercase tracking-wider opacity-70">{{ $detail['label'] }}</h3>
                                                 @if ($detail['href'])
-                                                    <a href="{{ $detail['href'] }}" class="mt-0.5 block whitespace-pre-line break-words font-medium hover:underline"
+                                                     <a href="{{ $detail['href'] }}" class="mt-0.5 block whitespace-pre-line break-words font-medium"
                                                         @if (str_starts_with($detail['href'], 'http')) target="_blank" rel="noopener noreferrer" @endif>{{ $detail['value'] }}</a>
                                                 @else
                                                     <p class="mt-0.5 whitespace-pre-line font-medium">{{ $detail['value'] }}</p>
@@ -160,7 +160,7 @@
                                 </h2>
                                 @if ($directionsUrl = $siteSettings->mapDirectionsUrl())
                                     <a href="{{ $directionsUrl }}" target="_blank" rel="noopener noreferrer"
-                                        class="inline-flex items-center gap-1.5 text-sm font-semibold text-brand-dark hover:underline">
+                                        class="inline-flex items-center gap-1.5 text-sm font-semibold text-brand-dark">
                                         <i class="fas fa-diamond-turn-right" aria-hidden="true"></i> Get directions
                                     </a>
                                 @endif

@@ -21,7 +21,7 @@
                 <div>
                     @if ($page->parent)
                         <nav aria-label="Breadcrumb" class="mb-4 text-sm font-semibold">
-                            <a href="{{ $page->parent->url() }}" class="text-brand-dark hover:underline">{{ $page->parent->title }}</a>
+                            <a href="{{ $page->parent->url() }}" class="text-brand-dark">{{ $page->parent->title }}</a>
                         </nav>
                     @endif
                     <h1 class="text-4xl font-bold leading-tight tracking-tight text-stone-950 sm:text-5xl">{{ $page->title }}</h1>

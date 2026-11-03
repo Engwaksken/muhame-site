@@ -17,10 +17,10 @@
     <header class="bg-brand-soft">
         <div class="mx-auto max-w-4xl px-5 py-14 sm:px-8 sm:py-20">
             <nav aria-label="Breadcrumb" class="flex flex-wrap items-center gap-2 text-sm font-semibold">
-                <a href="{{ route('posts.index') }}" class="text-brand-dark hover:underline">Insights</a>
+                <a href="{{ route('posts.index') }}" class="text-brand-dark">Insights</a>
                 @if ($post->category)
                     <span aria-hidden="true" class="text-stone-400">/</span>
-                    <a href="{{ route('categories.show', $post->category->slug) }}" class="text-brand-dark hover:underline">{{ $post->category->name }}</a>
+                    <a href="{{ route('categories.show', $post->category->slug) }}" class="text-brand-dark">{{ $post->category->name }}</a>
                 @endif
             </nav>
             <h1 class="mt-5 text-4xl font-bold leading-tight tracking-tight text-stone-950 sm:text-5xl">{{ $post->title }}</h1>

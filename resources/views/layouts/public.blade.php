@@ -6,7 +6,7 @@
     $navLink = 'inline-flex items-center gap-1 rounded-md px-3 py-2 text-[0.95rem] font-semibold text-stone-800 hover:text-brand-dark focus-visible:outline-2 focus-visible:outline-brand';
 @endphp
 <!DOCTYPE html>
-<html lang="{{ str_replace('_', '-', app()->getLocale()) }}" style="--brand: {{ $brand }}; --brand-fg: {{ $siteSettings->primaryTextColor() }}; --ink: {{ $ink }}; --ink-fg: {{ \App\Models\SiteSetting::readableTextOn($ink) }}; --font-body: {{ \App\Models\SiteSetting::fontStack($siteSettings->bodyFontKey()) }}; --font-heading: {{ \App\Models\SiteSetting::fontStack($siteSettings->headingFontKey()) }}; font-size: {{ $siteSettings->baseFontSize() }};">
+<html lang="{{ str_replace('_', '-', app()->getLocale()) }}" style="--brand: {{ $brand }}; --brand-fg: {{ $siteSettings->primaryTextColor() }}; --ink: {{ $ink }}; --ink-fg: #ffffff; --font-body: {{ \App\Models\SiteSetting::fontStack($siteSettings->bodyFontKey()) }}; --font-heading: {{ \App\Models\SiteSetting::fontStack($siteSettings->headingFontKey()) }}; font-size: {{ $siteSettings->baseFontSize() }};">
 <head>
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1">
@@ -59,7 +59,7 @@
                                             @if ($navPage->excerpt)
                                                 <p class="mt-2 text-sm leading-6 text-stone-600">{{ \Illuminate\Support\Str::limit($navPage->excerpt, 110) }}</p>
                                             @endif
-                                            <a href="{{ $navPage->url() }}" class="mt-4 inline-flex items-center gap-1 text-sm font-semibold text-brand-dark hover:underline">Overview <span aria-hidden="true">&rarr;</span></a>
+                                            <a href="{{ $navPage->url() }}" class="mt-4 inline-flex items-center gap-1 text-sm font-semibold text-brand-dark">Overview <span aria-hidden="true">&rarr;</span></a>
                                         </div>
                                         <ul class="col-span-3 space-y-1 p-4">
                                             @foreach ($navPage->children as $child)
@@ -100,7 +100,7 @@
                 <label for="site-search" class="sr-only">Search insights</label>
                 <input id="site-search" type="search" name="q" value="{{ request('q') }}" maxlength="100" placeholder="Search insights…" required
                     class="min-w-0 flex-1 rounded-full border border-stone-300 bg-white px-5 py-3 focus:border-brand focus:outline-none">
-                <button class="rounded-full bg-ink px-6 py-3 font-semibold text-ink-fg hover:opacity-90">Search</button>
+                <button class="rounded-full bg-ink px-6 py-3 font-semibold text-white hover:opacity-90">Search</button>
             </form>
         </div>
 
@@ -134,7 +134,7 @@
     </main>
 
     {{-- Footer --}}
-    <footer class="bg-ink text-ink-fg">
+    <footer class="bg-ink text-white">
         <div class="mx-auto grid max-w-7xl gap-12 px-5 py-16 sm:px-8 lg:grid-cols-12">
             <div class="lg:col-span-4">
                 <a href="{{ route('home') }}" class="text-2xl font-bold tracking-tight">{{ $siteSettings->site_name }}</a>
@@ -145,7 +145,7 @@
                     <p class="mt-4 whitespace-pre-line text-sm leading-6 opacity-75">{{ $siteSettings->footer_text }}</p>
                 @endif
                 @if ($siteSettings->contact_email)
-                    <a href="mailto:{{ $siteSettings->contact_email }}" class="mt-4 inline-block text-sm font-semibold underline underline-offset-4 opacity-90 hover:opacity-100">{{ $siteSettings->contact_email }}</a>
+                    <a href="mailto:{{ $siteSettings->contact_email }}" class="mt-4 inline-block text-sm font-semibold opacity-90 hover:opacity-100">{{ $siteSettings->contact_email }}</a>
                 @endif
             </div>
 
@@ -154,11 +154,11 @@
                     <h2 class="text-sm font-semibold uppercase tracking-[0.16em] opacity-70">Explore</h2>
                     <ul class="mt-4 space-y-2.5">
                         @foreach ($navigationPages as $navPage)
-                            <li><a href="{{ $navPage->url() }}" class="opacity-90 hover:underline hover:opacity-100">{{ $navPage->title }}</a></li>
+                            <li><a href="{{ $navPage->url() }}" class="opacity-90 hover:opacity-100">{{ $navPage->title }}</a></li>
                         @endforeach
-                        <li><a href="{{ route('posts.index') }}" class="opacity-90 hover:underline hover:opacity-100">Insights</a></li>
-                        <li><a href="{{ route('events.index') }}" class="opacity-90 hover:underline hover:opacity-100">Events</a></li>
-                        <li><a href="{{ route('contact') }}" class="opacity-90 hover:underline hover:opacity-100">Contact</a></li>
+                        <li><a href="{{ route('posts.index') }}" class="opacity-90 hover:opacity-100">Insights</a></li>
+                        <li><a href="{{ route('events.index') }}" class="opacity-90 hover:opacity-100">Events</a></li>
+                        <li><a href="{{ route('contact') }}" class="opacity-90 hover:opacity-100">Contact</a></li>
                     </ul>
                 </div>
                 @if ($footerLinks = $siteSettings->publicFooterLinks())
@@ -166,7 +166,7 @@
                         <h2 class="text-sm font-semibold uppercase tracking-[0.16em] opacity-70">About</h2>
                         <ul class="mt-4 space-y-2.5">
                             @foreach ($footerLinks as $label => $url)
-                                <li><a href="{{ $url }}" class="opacity-90 hover:underline hover:opacity-100" @if (\App\Support\SafeUrl::isExternal($url)) target="_blank" rel="noopener noreferrer" @endif>{{ $label }}</a></li>
+                                <li><a href="{{ $url }}" class="opacity-90 hover:opacity-100" @if (\App\Support\SafeUrl::isExternal($url)) target="_blank" rel="noopener noreferrer" @endif>{{ $label }}</a></li>
                             @endforeach
                         </ul>
                     </div>
@@ -186,7 +186,7 @@
                 @if ($socialLinks = $siteSettings->publicSocialLinks())
                     <ul class="flex flex-wrap gap-x-5 gap-y-2">
                         @foreach ($socialLinks as $network => $url)
-                            <li><a href="{{ $url }}" target="_blank" rel="noopener noreferrer" class="font-medium opacity-85 hover:underline hover:opacity-100">{{ $network }}</a></li>
+                            <li><a href="{{ $url }}" target="_blank" rel="noopener noreferrer" class="font-medium opacity-85 hover:opacity-100">{{ $network }}</a></li>
                         @endforeach
                     </ul>
                 @endif
