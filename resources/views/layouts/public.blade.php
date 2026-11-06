@@ -149,12 +149,12 @@
                 <div>
                     <h2 class="text-sm font-semibold uppercase tracking-[0.16em] opacity-70">Explore</h2>
                     <ul class="mt-4 space-y-2.5">
-                        @foreach ($navigationPages as $navPage)
-                            <li><a href="{{ $navPage->url() }}" class="opacity-90 hover:opacity-100">{{ $navPage->title }}</a></li>
+                        @foreach ($siteSettings->publicExplorePages() as $explorePage)
+                            <li><a href="{{ $explorePage->url() }}" class="opacity-90 hover:opacity-100">{{ $explorePage->title }}</a></li>
                         @endforeach
-                        <li><a href="{{ route('posts.index') }}" class="opacity-90 hover:opacity-100">Insights</a></li>
-                        <li><a href="{{ route('events.index') }}" class="opacity-90 hover:opacity-100">Events</a></li>
-                        <li><a href="{{ route('contact') }}" class="opacity-90 hover:opacity-100">Contact</a></li>
+                        @foreach ($siteSettings->publicExploreLinks() as $label => $url)
+                            <li><a href="{{ $url }}" class="opacity-90 hover:opacity-100">{{ $label }}</a></li>
+                        @endforeach
                     </ul>
                 </div>
                 @php($footerPages = $siteSettings->publicFooterPages())

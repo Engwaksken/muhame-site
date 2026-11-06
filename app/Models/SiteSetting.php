@@ -11,6 +11,7 @@ use Illuminate\Support\Collection;
 #[Fillable([
     'site_name', 'tagline', 'homepage_title', 'homepage_description', 'contact_email', 'logo_path',
     'navigation_links', 'social_links', 'primary_color', 'accent_color', 'footer_text', 'footer_links', 'footer_pages',
+    'explore_pages', 'explore_links',
     'newsletter_heading', 'newsletter_text', 'favicon_path', 'body_font', 'heading_font', 'base_font_size',
     'contact_phone', 'contact_address', 'office_hours', 'map_location', 'map_embed_url',
     'header_display', 'primary_text_color',
@@ -64,6 +65,8 @@ class SiteSetting extends Model
             'social_links' => 'array',
             'footer_links' => 'array',
             'footer_pages' => 'array',
+            'explore_pages' => 'array',
+            'explore_links' => 'array',
         ];
     }
 
@@ -85,6 +88,9 @@ class SiteSetting extends Model
             'navigation_links' => [],
             'social_links' => [],
             'footer_links' => [],
+            'footer_pages' => [],
+            'explore_pages' => [],
+            'explore_links' => ['insights', 'events', 'contact'],
         ];
     }
 
@@ -293,7 +299,38 @@ class SiteSetting extends Model
     /** Published pages selected for the footer, preserving the admin's chosen order. */
     public function publicFooterPages(): Collection
     {
-        $pageIds = array_values(array_filter(array_map('intval', $this->footer_pages ?? [])));
+        return $this->publishedSelectedPages($this->footer_pages ?? []);
+    }
+
+    /** Published pages selected for the footer's Explore group, in admin-selected order. */
+    public function publicExplorePages(): Collection
+    {
+        return $this->publishedSelectedPages($this->explore_pages ?? []);
+    }
+
+    /** @return array<string, string> */
+    public function publicExploreLinks(): array
+    {
+        $available = [
+            'insights' => route('posts.index'),
+            'events' => route('events.index'),
+            'contact' => route('contact'),
+        ];
+        $selected = $this->explore_links ?? array_keys($available);
+
+        return collect($selected)->filter(fn ($key) => is_string($key) && isset($available[$key]))
+            ->mapWithKeys(fn (string $key) => [match ($key) {
+                'insights' => 'Insights',
+                'events' => 'Events',
+                'contact' => 'Contact',
+            } => $available[$key]])
+            ->all();
+    }
+
+    /** @param array<mixed> $selectedPageIds */
+    private function publishedSelectedPages(array $selectedPageIds): Collection
+    {
+        $pageIds = array_values(array_filter(array_map('intval', $selectedPageIds)));
 
         if ($pageIds === []) {
             return collect();

@@ -149,6 +149,14 @@ class SiteSettingResource extends Resource
                     Tab::make('Footer & social')->icon(FaIcon::make('fa-layer-group'))->schema([
                         Textarea::make('footer_text')->label('Footer about text')->rows(3)->maxLength(500)
                             ->helperText('A short description or address shown in the footer.'),
+                        Select::make('explore_pages')->label('Pages in Explore')->multiple()->searchable()->preload()
+                            ->options(fn () => Page::query()->published()->orderBy('title')->pluck('title', 'id')->all())
+                            ->helperText('Select published pages for the Explore group in the footer.'),
+                        Select::make('explore_links')->label('Built-in Explore links')->multiple()
+                            ->options(['insights' => 'Insights', 'events' => 'Events', 'contact' => 'Contact'])
+                            ->default(['insights', 'events', 'contact'])
+                            ->formatStateUsing(fn (?array $state) => $state ?? ['insights', 'events', 'contact'])
+                            ->helperText('Choose which built-in links appear alongside the selected pages.'),
                         Select::make('footer_pages')->label('Pages in footer')->multiple()->searchable()->preload()
                             ->options(fn () => Page::query()->published()->orderBy('title')->pluck('title', 'id')->all())
                             ->helperText('Choose which published pages appear in the footer. Unpublished pages are hidden automatically.'),

@@ -99,6 +99,24 @@ class PagesAndContactTest extends TestCase
         );
     }
 
+    public function test_admin_can_select_explore_pages_and_builtin_links(): void
+    {
+        $selected = Page::factory()->create(['title' => 'Explore selected', 'slug' => 'explore-selected']);
+        $draft = Page::factory()->draft()->create(['title' => 'Explore draft', 'slug' => 'explore-draft']);
+
+        SiteSetting::current()->update([
+            'explore_pages' => [$selected->id, $draft->id],
+            'explore_links' => ['contact'],
+        ]);
+
+        $this->get('/')->assertOk()
+            ->assertSee('Explore selected')
+            ->assertDontSee('Explore draft')
+            ->assertSee('href="'.url('/contact').'"', false)
+            ->assertDontSee('href="'.url('/insights').'"', false)
+            ->assertDontSee('href="'.url('/events').'"', false);
+    }
+
     public function test_sitemap_lists_indexable_pages_and_contact(): void
     {
         Page::factory()->create(['slug' => 'about']);
