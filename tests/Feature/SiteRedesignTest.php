@@ -384,4 +384,10 @@ class SiteRedesignTest extends TestCase
             $this->assertSame('published', $page->fresh()->status, $page->slug.' did not publish');
         }
     }
+
+    public function test_livewire_accepts_rich_editor_nesting_and_uses_kampala_timezone(): void
+    {
+        $this->assertSame('Africa/Kampala', config('app.timezone'));
+        $this->assertGreaterThanOrEqual(13, config('livewire.payload.max_nesting_depth'));
+    }
 }
