@@ -4,6 +4,7 @@ namespace App\Filament\Resources\SiteSettings;
 
 use App\Filament\Resources\SiteSettings\Pages\ManageSiteSettings;
 use App\Models\SiteSetting;
+use App\Models\Page;
 use App\Support\FaIcon;
 use BackedEnum;
 use Closure;
@@ -148,6 +149,9 @@ class SiteSettingResource extends Resource
                     Tab::make('Footer & social')->icon(FaIcon::make('fa-layer-group'))->schema([
                         Textarea::make('footer_text')->label('Footer about text')->rows(3)->maxLength(500)
                             ->helperText('A short description or address shown in the footer.'),
+                        Select::make('footer_pages')->label('Pages in footer')->multiple()->searchable()->preload()
+                            ->options(fn () => Page::query()->published()->orderBy('title')->pluck('title', 'id')->all())
+                            ->helperText('Choose which published pages appear in the footer. Unpublished pages are hidden automatically.'),
                         KeyValue::make('footer_links')->label('Footer links')
                             ->keyLabel('Link label')->valueLabel('URL or path')
                             ->keyPlaceholder('Privacy policy')->valuePlaceholder('/privacy')

@@ -6,10 +6,11 @@ use App\Support\Media;
 use App\Support\SafeUrl;
 use Illuminate\Database\Eloquent\Attributes\Fillable;
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Support\Collection;
 
 #[Fillable([
     'site_name', 'tagline', 'homepage_title', 'homepage_description', 'contact_email', 'logo_path',
-    'navigation_links', 'social_links', 'primary_color', 'accent_color', 'footer_text', 'footer_links',
+    'navigation_links', 'social_links', 'primary_color', 'accent_color', 'footer_text', 'footer_links', 'footer_pages',
     'newsletter_heading', 'newsletter_text', 'favicon_path', 'body_font', 'heading_font', 'base_font_size',
     'contact_phone', 'contact_address', 'office_hours', 'map_location', 'map_embed_url',
     'header_display', 'primary_text_color',
@@ -62,6 +63,7 @@ class SiteSetting extends Model
             'navigation_links' => 'array',
             'social_links' => 'array',
             'footer_links' => 'array',
+            'footer_pages' => 'array',
         ];
     }
 
@@ -286,6 +288,20 @@ class SiteSetting extends Model
     public function publicFooterLinks(): array
     {
         return $this->safeLinks($this->footer_links ?? [], allowRelative: true);
+    }
+
+    /** Published pages selected for the footer, preserving the admin's chosen order. */
+    public function publicFooterPages(): Collection
+    {
+        $pageIds = array_values(array_filter(array_map('intval', $this->footer_pages ?? [])));
+
+        if ($pageIds === []) {
+            return collect();
+        }
+
+        return Page::query()->published()->whereIn('id', $pageIds)->get()
+            ->sortBy(fn (Page $page) => array_search($page->getKey(), $pageIds, true))
+            ->values();
     }
 
     private function validHex(?string $value): ?string

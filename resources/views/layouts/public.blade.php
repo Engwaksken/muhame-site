@@ -157,10 +157,15 @@
                         <li><a href="{{ route('contact') }}" class="opacity-90 hover:opacity-100">Contact</a></li>
                     </ul>
                 </div>
-                @if ($footerLinks = $siteSettings->publicFooterLinks())
+                @php($footerPages = $siteSettings->publicFooterPages())
+                @php($footerLinks = $siteSettings->publicFooterLinks())
+                @if ($footerPages->isNotEmpty() || $footerLinks)
                     <div>
-                        <h2 class="text-sm font-semibold uppercase tracking-[0.16em] opacity-70">About</h2>
+                        <h2 class="text-sm font-semibold uppercase tracking-[0.16em] opacity-70">Pages & links</h2>
                         <ul class="mt-4 space-y-2.5">
+                            @foreach ($footerPages as $footerPage)
+                                <li><a href="{{ $footerPage->url() }}" class="opacity-90 hover:opacity-100">{{ $footerPage->title }}</a></li>
+                            @endforeach
                             @foreach ($footerLinks as $label => $url)
                                 <li><a href="{{ $url }}" class="opacity-90 hover:opacity-100" @if (\App\Support\SafeUrl::isExternal($url)) target="_blank" rel="noopener noreferrer" @endif>{{ $label }}</a></li>
                             @endforeach

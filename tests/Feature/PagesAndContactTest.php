@@ -78,6 +78,27 @@ class PagesAndContactTest extends TestCase
         $this->assertStringContainsString('Contact us', $header[0]);
     }
 
+    public function test_footer_lists_only_admin_selected_published_pages_in_selected_order(): void
+    {
+        $about = Page::factory()->create(['title' => 'About footer', 'slug' => 'about-footer']);
+        $privacy = Page::factory()->create(['title' => 'Privacy footer', 'slug' => 'privacy-footer']);
+        $draft = Page::factory()->draft()->create(['title' => 'Draft footer', 'slug' => 'draft-footer']);
+
+        SiteSetting::current()->update(['footer_pages' => [$privacy->id, $draft->id, $about->id]]);
+
+        $response = $this->get('/')->assertOk()
+            ->assertSee('Privacy footer')
+            ->assertSee('About footer')
+            ->assertDontSee('Draft footer');
+
+        $this->assertStringContainsString('href="'.url('/privacy-footer').'"', $response->getContent());
+        $this->assertStringContainsString('href="'.url('/about-footer').'"', $response->getContent());
+        $this->assertLessThan(
+            strpos($response->getContent(), 'About footer'),
+            strpos($response->getContent(), 'Privacy footer'),
+        );
+    }
+
     public function test_sitemap_lists_indexable_pages_and_contact(): void
     {
         Page::factory()->create(['slug' => 'about']);
