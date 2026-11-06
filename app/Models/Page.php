@@ -13,7 +13,7 @@ use Illuminate\Support\Str;
 
 #[Fillable([
     'parent_id', 'title', 'slug', 'excerpt', 'hero_image', 'body', 'blocks', 'status', 'is_homepage',
-    'show_in_navigation', 'navigation_order', 'seo_title', 'seo_description', 'noindex',
+    'show_in_navigation', 'navigation_order', 'seo_title', 'seo_description', 'noindex', 'header_link_label', 'header_link_url',
 ])]
 class Page extends Model
 {

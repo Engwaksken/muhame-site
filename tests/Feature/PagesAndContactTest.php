@@ -56,6 +56,21 @@ class PagesAndContactTest extends TestCase
             ->assertDontSee('onerror', false);
     }
 
+    public function test_page_header_can_show_a_page_specific_external_button(): void
+    {
+        Page::factory()->create([
+            'title' => 'Partners',
+            'slug' => 'partners',
+            'header_link_label' => 'Get your eHub license',
+            'header_link_url' => 'https://app.ehub.academy',
+        ]);
+
+        $this->get('/partners')->assertOk()
+            ->assertSee('Get your eHub license')
+            ->assertSee('href="https://app.ehub.academy"', false)
+            ->assertSee('target="_blank" rel="noopener noreferrer"', false);
+    }
+
     public function test_navigation_shows_published_menu_pages_in_order(): void
     {
         Page::factory()->inNavigation(2)->create(['title' => 'Services', 'slug' => 'services']);

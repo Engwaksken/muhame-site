@@ -1,5 +1,6 @@
 @php($columns = ['2' => 'sm:grid-cols-2', '3' => 'sm:grid-cols-2 lg:grid-cols-3', '4' => 'sm:grid-cols-2 lg:grid-cols-4'][(string) ($data['columns'] ?? 3)] ?? 'sm:grid-cols-2 lg:grid-cols-3')
 @php($cardStyle = ['cards' => 'rounded-[10px] border border-t-0 border-stone-200 bg-white', 'numbered' => 'border-l-2 border-brand bg-transparent', 'minimal' => 'border-t border-stone-200 bg-transparent'][(string) ($data['layout'] ?? 'cards')] ?? 'rounded-[10px] border border-t-0 border-stone-200 bg-white')
+@php($imageRatio = ['landscape' => 'aspect-[16/10]', 'square' => 'aspect-square', 'portrait' => 'aspect-[4/5]'][(string) ($data['image_ratio'] ?? 'landscape')] ?? 'aspect-[16/10]')
 <section class="mx-auto max-w-7xl px-5 py-14 sm:px-8 sm:py-20">
     @if (filled($data['heading'] ?? null) || filled($data['intro'] ?? null))
         <div class="mb-10 max-w-3xl">
@@ -17,7 +18,7 @@
             @php($cardUrl = \App\Support\SafeUrl::clean($card['url'] ?? null))
             <article class="group relative flex h-full flex-col overflow-hidden {{ $cardStyle }} transition hover:-translate-y-1 hover:shadow-lg">
                 @if ($cardImage)
-                    <div class="aspect-[16/10] overflow-hidden bg-stone-100">
+                    <div class="{{ $imageRatio }} overflow-hidden bg-stone-100">
                         <img src="{{ $cardImage }}" alt="" loading="lazy" class="h-full w-full object-cover transition duration-300 group-hover:scale-[1.03]">
                     </div>
                 @else

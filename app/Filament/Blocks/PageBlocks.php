@@ -65,6 +65,8 @@ class PageBlocks
                 TextInput::make('heading')->maxLength(150),
                 Textarea::make('intro')->rows(2)->maxLength(300),
                 Select::make('layout')->options(['cards' => 'Cards', 'numbered' => 'Numbered list', 'minimal' => 'Minimal columns'])->default('cards'),
+                Select::make('image_ratio')->label('Image crop')->options(['landscape' => 'Landscape (16:10)', 'square' => 'Square (1:1)', 'portrait' => 'Portrait (4:5)'])->default('landscape')
+                    ->helperText('Images fill the selected shape and are cropped to fit.'),
                 Select::make('columns')->options([2 => '2 per row', 3 => '3 per row', 4 => '4 per row'])->default(3)->required(),
                 Repeater::make('cards')->schema([
                     self::image('image'),

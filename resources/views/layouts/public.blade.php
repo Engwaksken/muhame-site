@@ -4,6 +4,11 @@
     $logoUrl = \App\Support\Media::url($siteSettings->logo_path);
     $menuLinks = $siteSettings->publicNavigationLinks();
     $navLink = 'inline-flex items-center gap-1 rounded-md px-3 py-2 text-[0.95rem] font-semibold text-stone-800 hover:text-brand-dark focus-visible:outline-2 focus-visible:outline-brand';
+    $pageHeaderLinkUrl = isset($page) && $page instanceof \App\Models\Page
+        ? \App\Support\SafeUrl::clean($page->header_link_url, allowRelative: false)
+        : null;
+    $pageHeaderLinkLabel = $pageHeaderLinkUrl && isset($page) ? trim((string) $page->header_link_label) : '';
+    if ($pageHeaderLinkLabel === '') $pageHeaderLinkUrl = null;
 @endphp
 <!DOCTYPE html>
 <html lang="{{ str_replace('_', '-', app()->getLocale()) }}" style="--brand: {{ $brand }}; --brand-fg: {{ $siteSettings->primaryTextColor() }}; --ink: {{ $ink }}; --ink-fg: #ffffff; --font-body: {{ \App\Models\SiteSetting::fontStack($siteSettings->bodyFontKey()) }}; --font-heading: {{ \App\Models\SiteSetting::fontStack($siteSettings->headingFontKey()) }}; font-size: {{ $siteSettings->baseFontSize() }};">
@@ -33,13 +38,31 @@
 
     {{-- Header --}}
     <header class="sticky top-0 z-40 border-b border-stone-200 bg-white/95 backdrop-blur">
+        @if ($pageHeaderLinkUrl)
+            <div class="border-b border-stone-200 bg-white">
+                <div class="mx-auto flex min-h-16 max-w-7xl items-center justify-between gap-4 px-5 py-2 sm:px-8">
+                    <a href="{{ route('home') }}" class="flex min-w-0 items-center gap-3 text-xl font-bold tracking-tight text-stone-950">
+                        @if ($logoUrl && $siteSettings->headerShowsLogo())
+                            <img src="{{ $logoUrl }}" alt="" class="max-h-11 max-w-44 object-contain">
+                        @endif
+                        <span @class(['sr-only' => ! $siteSettings->headerShowsName(), 'truncate'])>{{ $siteSettings->site_name }}</span>
+                    </a>
+                    <a href="{{ $pageHeaderLinkUrl }}" class="inline-flex shrink-0 items-center justify-center rounded-full bg-brand px-5 py-2.5 text-sm font-semibold text-brand-fg hover:bg-brand-dark"
+                        @if (\App\Support\SafeUrl::isExternal($pageHeaderLinkUrl)) target="_blank" rel="noopener noreferrer" @endif>
+                        {{ $pageHeaderLinkLabel }}
+                    </a>
+                </div>
+            </div>
+        @endif
         <div class="mx-auto flex h-18 max-w-7xl items-center gap-6 px-5 sm:px-8">
-            <a href="{{ route('home') }}" class="flex min-w-0 shrink-0 items-center gap-3 text-xl font-bold tracking-tight text-stone-950">
-                @if ($logoUrl && $siteSettings->headerShowsLogo())
-                    <img src="{{ $logoUrl }}" alt="" class="max-h-11 max-w-44 object-contain">
-                @endif
-                <span @class(['sr-only' => ! $siteSettings->headerShowsName(), 'truncate'])>{{ $siteSettings->site_name }}</span>
-            </a>
+            @unless ($pageHeaderLinkUrl)
+                <a href="{{ route('home') }}" class="flex min-w-0 shrink-0 items-center gap-3 text-xl font-bold tracking-tight text-stone-950">
+                    @if ($logoUrl && $siteSettings->headerShowsLogo())
+                        <img src="{{ $logoUrl }}" alt="" class="max-h-11 max-w-44 object-contain">
+                    @endif
+                    <span @class(['sr-only' => ! $siteSettings->headerShowsName(), 'truncate'])>{{ $siteSettings->site_name }}</span>
+                </a>
+            @endunless
 
             {{-- Desktop navigation --}}
             <nav aria-label="Main" class="ml-auto hidden lg:block">

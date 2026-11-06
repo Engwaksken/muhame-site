@@ -8,6 +8,7 @@ use App\Filament\Resources\Pages\Pages\EditPage;
 use App\Filament\Resources\Pages\Pages\ListPages;
 use App\Models\Page;
 use App\Support\FaIcon;
+use App\Support\SafeUrl;
 use BackedEnum;
 use Filament\Actions\Action;
 use Filament\Actions\BulkActionGroup;
@@ -31,6 +32,7 @@ use Filament\Tables\Columns\IconColumn;
 use Filament\Tables\Columns\TextColumn;
 use Filament\Tables\Filters\SelectFilter;
 use Filament\Tables\Table;
+use Closure;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Support\Str;
 use Illuminate\Validation\Rule;
@@ -56,6 +58,15 @@ class PageResource extends Resource
                                 ? $set('slug', Str::slug($state ?? '')) : null),
                         Textarea::make('excerpt')->label('Introduction')->rows(3)->maxLength(300)
                             ->helperText('Shown under the title at the top of the page, and in menu dropdowns.'),
+                        TextInput::make('header_link_label')->label('Top header button text')->maxLength(60)->requiredWith('header_link_url')
+                            ->helperText('Optional page-specific button shown in the top header.'),
+                        TextInput::make('header_link_url')->label('Top header button URL')->maxLength(255)->requiredWith('header_link_label')
+                            ->placeholder('https://example.com')
+                            ->rules([fn () => function (string $attribute, mixed $value, Closure $fail): void {
+                                if (filled($value) && SafeUrl::clean($value, allowRelative: false) === null) {
+                                    $fail('Use a valid https://, http://, or mailto: URL.');
+                                }
+                            }]),
                         FileUpload::make('hero_image')->label('Header image')->image()->disk('public')->directory('pages')
                             ->visibility('public')->maxSize(5120)->columnSpanFull()
                             ->helperText('Optional wide image at the top of the page. Not shown when the page starts with a Hero banner section.'),
