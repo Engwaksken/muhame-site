@@ -32,6 +32,7 @@ class AdminPanelProvider extends PanelProvider
             ->default()
             ->id('admin')
             ->path('admin')
+            ->brandName(fn (): string => SiteSetting::query()->value('site_name') ?: config('app.name', 'Admin'))
             ->login()
             ->registration(app()->environment('local') && config('cms.allow_registration') ? Registration::class : null)
             ->favicon(fn (): string => SiteSetting::current()->faviconUrl())

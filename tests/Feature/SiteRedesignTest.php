@@ -283,6 +283,7 @@ class SiteRedesignTest extends TestCase
         $settings = SiteSetting::query()->find(1);
         $this->assertSame('inter', $settings->body_font);
         $this->assertSame('#0B5FFF', $settings->primary_color);
+        $this->get('/admin')->assertOk()->assertSee('Muhame');
     }
 
     public function test_chosen_fonts_size_and_favicon_are_used_on_the_public_site(): void
