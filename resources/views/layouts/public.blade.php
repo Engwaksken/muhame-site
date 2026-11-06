@@ -73,8 +73,6 @@
                             <li><a href="{{ $navPage->url() }}" class="{{ $navLink }}" @if (url()->current() === $navPage->url()) aria-current="page" @endif>{{ $navPage->title }}</a></li>
                         @endif
                     @endforeach
-                    <li><a href="{{ route('posts.index') }}" class="{{ $navLink }}" @if (request()->routeIs('posts.*', 'categories.*', 'tags.*')) aria-current="page" @endif>Insights</a></li>
-                    <li><a href="{{ route('events.index') }}" class="{{ $navLink }}" @if (request()->routeIs('events.*')) aria-current="page" @endif>Events</a></li>
                     @foreach ($menuLinks as $label => $url)
                         <li><a href="{{ $url }}" class="{{ $navLink }}" @if (\App\Support\SafeUrl::isExternal($url)) target="_blank" rel="noopener noreferrer" @endif>{{ $label }}</a></li>
                     @endforeach
@@ -119,8 +117,6 @@
                         @endif
                     </li>
                 @endforeach
-                <li><a href="{{ route('posts.index') }}" class="block rounded-lg px-3 py-3 text-lg font-semibold text-stone-900 hover:bg-stone-100">Insights</a></li>
-                <li><a href="{{ route('events.index') }}" class="block rounded-lg px-3 py-3 text-lg font-semibold text-stone-900 hover:bg-stone-100">Events</a></li>
                 @foreach ($menuLinks as $label => $url)
                     <li><a href="{{ $url }}" class="block rounded-lg px-3 py-3 text-lg font-semibold text-stone-900 hover:bg-stone-100">{{ $label }}</a></li>
                 @endforeach

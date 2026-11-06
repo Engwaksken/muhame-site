@@ -63,11 +63,19 @@ class PagesAndContactTest extends TestCase
         Page::factory()->draft()->inNavigation(0)->create(['title' => 'Hidden draft', 'slug' => 'hidden-draft']);
         Page::factory()->create(['title' => 'Not in menu', 'slug' => 'not-in-menu']);
 
-        $this->get('/')->assertOk()
+        $response = $this->get('/')->assertOk()
             ->assertSeeInOrder(['href="'.url('/about').'"', 'href="'.url('/services').'"'], false)
             ->assertDontSee('Hidden draft')
-            ->assertDontSee('Not in menu')
-            ->assertSee('href="'.route('contact').'"', false);
+            ->assertDontSee('Not in menu');
+
+        preg_match('/<header\b.*?<\/header>/s', $response->getContent(), $header);
+        $this->assertNotEmpty($header);
+        $this->assertStringNotContainsString(route('posts.index'), $header[0]);
+        $this->assertStringNotContainsString(route('events.index'), $header[0]);
+        $this->assertStringNotContainsString('Insights', $header[0]);
+        $this->assertStringNotContainsString('Events', $header[0]);
+        $this->assertStringContainsString(route('contact'), $header[0]);
+        $this->assertStringContainsString('Contact us', $header[0]);
     }
 
     public function test_sitemap_lists_indexable_pages_and_contact(): void
