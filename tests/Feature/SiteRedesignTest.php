@@ -318,7 +318,7 @@ class SiteRedesignTest extends TestCase
 
         $this->get('/admin/pages/'.$home->id.'/edit')->assertOk()
             ->assertSee('Page header')->assertSee('Sections')->assertSee('Publishing &amp; menu', false)
-            ->assertSee('Hero banner: A clear headline');
+            ->assertSee('Hero banner: We study how out-of-school youth');
     }
 
     public function test_admin_creates_a_post_and_an_event_through_the_tabbed_forms(): void
@@ -365,5 +365,6 @@ class SiteRedesignTest extends TestCase
 
         $this->assertSame(1, Page::query()->where('is_homepage', true)->count());
         $this->assertSame('draft', Page::query()->where('is_homepage', true)->value('status'));
+        $this->assertSame(6, Page::query()->count());
     }
 }

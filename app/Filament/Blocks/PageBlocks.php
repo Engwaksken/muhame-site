@@ -48,6 +48,7 @@ class PageBlocks
 
             Block::make('text')->label(self::label('Text section'))->icon(FaIcon::make('fa-align-left'))->schema([
                 TextInput::make('heading')->maxLength(150),
+                Select::make('layout')->options(['standard' => 'Standard reading column', 'wide' => 'Wide content', 'centered' => 'Centered content', 'split' => 'Two-column content'])->default('standard')->required(),
                 RichEditor::make('content')->required(),
                 ...self::button(),
             ]),
@@ -63,6 +64,7 @@ class PageBlocks
             Block::make('cards')->label(self::label('Card row'))->icon(FaIcon::make('fa-table-cells-large'))->schema([
                 TextInput::make('heading')->maxLength(150),
                 Textarea::make('intro')->rows(2)->maxLength(300),
+                Select::make('layout')->options(['cards' => 'Cards', 'numbered' => 'Numbered list', 'minimal' => 'Minimal columns'])->default('cards')->required(),
                 Select::make('columns')->options([2 => '2 per row', 3 => '3 per row', 4 => '4 per row'])->default(3)->required(),
                 Repeater::make('cards')->schema([
                     self::image('image'),
@@ -77,6 +79,7 @@ class PageBlocks
 
             Block::make('stats')->label(self::label('Key statistics'))->icon(FaIcon::make('fa-chart-column'))->schema([
                 TextInput::make('heading')->maxLength(150),
+                Select::make('layout')->options(['band' => 'Highlight band', 'cards' => 'Individual cards', 'inline' => 'Inline figures'])->default('band')->required(),
                 Repeater::make('items')->label('Statistics')->schema([
                     TextInput::make('value')->required()->maxLength(20)->placeholder('25,000+'),
                     TextInput::make('label')->required()->maxLength(120)->placeholder('people trained'),
