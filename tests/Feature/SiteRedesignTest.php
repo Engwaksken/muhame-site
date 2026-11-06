@@ -4,6 +4,7 @@ namespace Tests\Feature;
 
 use App\Filament\Resources\Events\Pages\ManageEvents;
 use App\Filament\Resources\Pages\Pages\CreatePage;
+use App\Filament\Resources\Pages\Pages\EditPage;
 use App\Filament\Resources\Posts\Pages\ManagePosts;
 use App\Filament\Resources\SiteSettings\Pages\ManageSiteSettings;
 use App\Filament\Resources\Subscribers\Pages\ManageSubscribers;
@@ -367,5 +368,20 @@ class SiteRedesignTest extends TestCase
         $this->assertSame(1, Page::query()->where('is_homepage', true)->count());
         $this->assertSame('draft', Page::query()->where('is_homepage', true)->value('status'));
         $this->assertSame(6, Page::query()->count());
+    }
+
+    public function test_imported_pages_can_be_edited_and_published(): void
+    {
+        $this->seed();
+        $this->actingAs(User::factory()->create()->assignRole('Admin'));
+
+        foreach (Page::query()->orderBy('id')->get() as $page) {
+            Livewire::test(EditPage::class, ['record' => $page->getRouteKey()])
+                ->fillForm(['status' => 'published'])
+                ->call('save')
+                ->assertHasNoFormErrors();
+
+            $this->assertSame('published', $page->fresh()->status, $page->slug.' did not publish');
+        }
     }
 }
