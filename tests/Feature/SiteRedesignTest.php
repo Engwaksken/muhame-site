@@ -14,6 +14,7 @@ use App\Models\Post;
 use App\Models\SiteSetting;
 use App\Models\Subscriber;
 use App\Models\User;
+use Database\Seeders\StarterHomepageSeeder;
 use Filament\Actions\CreateAction;
 use Filament\Actions\EditAction;
 use Filament\Support\Enums\Width;
@@ -389,5 +390,63 @@ class SiteRedesignTest extends TestCase
     {
         $this->assertSame('Africa/Kampala', config('app.timezone'));
         $this->assertGreaterThanOrEqual(13, config('livewire.payload.max_nesting_depth'));
+    }
+
+    public function test_method_page_import_renders_the_graphic_methodology_sections(): void
+    {
+        $this->seed(StarterHomepageSeeder::class);
+        $method = Page::query()->where('slug', 'our-method')->firstOrFail();
+        $this->assertSame('methodology_showcase', $method->blocks[0]['type']);
+
+        $method->update(['status' => 'published']);
+
+        $this->get('/our-method')->assertOk()
+            ->assertSee('The methodology: eHub NeLP®')
+            ->assertSee('Generation of knowledge')
+            ->assertSee('The learner journey')
+            ->assertSee('Learn adaptively')
+            ->assertSee('bg-[#002d22]', false);
+    }
+
+    public function test_reseeding_upgrades_an_existing_draft_method_page_without_duplicates(): void
+    {
+        Page::factory()->draft()->create([
+            'title' => 'Our Method',
+            'slug' => 'our-method',
+            'blocks' => [
+                ['type' => 'text', 'data' => ['heading' => 'Why structured skills training and placement matter', 'content' => '<p>Old imported text</p>']],
+                ['type' => 'cards', 'data' => ['heading' => 'Four learning experiences', 'cards' => []]],
+            ],
+        ]);
+
+        $this->seed(StarterHomepageSeeder::class);
+        $this->seed(StarterHomepageSeeder::class);
+
+        $blocks = Page::query()->where('slug', 'our-method')->value('blocks');
+        $this->assertSame('methodology_showcase', $blocks[0]['type']);
+        $this->assertSame(1, collect($blocks)->where('type', 'methodology_showcase')->count());
+        $this->assertFalse(collect($blocks)->contains(fn (array $block) => ($block['data']['heading'] ?? null) === 'Four learning experiences'));
+    }
+
+    public function test_standalone_learner_journey_block_renders_as_a_timeline(): void
+    {
+        Page::factory()->create([
+            'title' => 'Our Method',
+            'slug' => 'our-method',
+            'blocks' => [[
+                'type' => 'learner_journey',
+                'data' => [
+                    'heading' => 'THE LEARNER JOURNEY',
+                    'steps' => [['label' => 'Sign up'], ['label' => 'Get assessed'], ['label' => 'Learn adaptively'], ['label' => 'Get certified'], ['label' => 'Get matched'], ['label' => 'Get placed']],
+                    'note' => 'From first lesson to first paycheck.',
+                ],
+            ]],
+        ]);
+
+        $this->get('/our-method')->assertOk()
+            ->assertSee('THE LEARNER JOURNEY')
+            ->assertSee('01')->assertSee('06')
+            ->assertSee('Get assessed')->assertSee('Get placed')
+            ->assertSee('From first lesson to first paycheck.');
     }
 }

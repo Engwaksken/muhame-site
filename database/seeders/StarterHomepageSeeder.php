@@ -26,9 +26,7 @@ class StarterHomepageSeeder extends Seeder
                 ]],
             ['title' => 'Our Method', 'slug' => 'our-method', 'show_in_navigation' => true, 'navigation_order' => 2,
                 'excerpt' => 'Evidence-based learning and placement through eHub NeLP®.', 'blocks' => [
-                    ['type' => 'text', 'data' => ['heading' => 'Why structured skills training and placement matter', 'content' => '<p>Research with disadvantaged, out-of-school Ugandan youth found vocational training gains persisted longer than apprenticeship gains, in part because a completion certificate lets workers prove skills to a new employer. (Alfonsi et al., 2020, Econometrica.)</p><p>eHub builds training around how adults with fragmented schooling learn: short, context-anchored units; spaced retrieval; and scaffolded discovery.</p>']],
-                    ['type' => 'cards', 'data' => ['heading' => 'Four learning experiences', 'intro' => 'NeLP® (Neuroscientific Learning Pattern) starts from the behaviour that must change, grounded in measurable cognitive constructs.', 'columns' => '2', 'layout' => 'cards', 'cards' => [['title' => 'Generation of knowledge', 'text' => 'Start from prior knowledge and real operational context; new understanding is generated, not received. Evidence: Slamecka & Graf (1978); Bruner (1961).'], ['title' => 'Contextualized exemplification', 'text' => 'Situate content in a real operational scenario, not an abstract rule. Evidence: Morris, Bransford & Franks (1977); Sweller (1988).'], ['title' => 'Active reworking', 'text' => 'Learners decide, act, and make errors inside branching scenarios. Evidence: Bjork (1994); Roediger & Karpicke (2006).'], ['title' => 'Spaced training and certification', 'text' => 'Short sessions support retention and end in a verified, resume-ready credential. Evidence: Cepeda et al. (2006); Alfonsi et al. (2020).']]]],
-                    ['type' => 'text', 'data' => ['heading' => 'The learner journey', 'content' => '<ol><li>Sign up</li><li>Get assessed</li><li>Learn adaptively</li><li>Get certified</li><li>Get matched</li><li>Get placed</li></ol><p>One learner, one platform, from first lesson to first paycheck. Eight weeks via eHub versus approximately 18 months on the traditional path.</p>']],
+                    ['type' => 'methodology_showcase', 'data' => self::methodologyShowcase()],
                 ]],
             ['title' => 'Field Work', 'slug' => 'field-work', 'show_in_navigation' => true, 'navigation_order' => 3,
                 'excerpt' => 'Training goes to where people live and work.', 'blocks' => [
@@ -52,5 +50,56 @@ class StarterHomepageSeeder extends Seeder
 
             Page::query()->create([...$attributes, 'status' => 'draft']);
         }
+
+        $this->upgradeDraftMethodPage();
+    }
+
+    /** Replace the original starter method sections, without changing published or custom pages. */
+    private function upgradeDraftMethodPage(): void
+    {
+        $page = Page::query()->where('slug', 'our-method')->where('status', 'draft')->first();
+
+        if (! $page || collect($page->blocks ?? [])->contains(fn ($block) => is_array($block) && ($block['type'] ?? null) === 'methodology_showcase')) {
+            return;
+        }
+
+        $starterHeadings = [
+            'Why structured skills training and placement matter',
+            'Four learning experiences',
+            'The learner journey',
+        ];
+        $blocks = collect($page->blocks ?? [])->reject(fn ($block) => is_array($block) && in_array($block['data']['heading'] ?? null, $starterHeadings, true))->values();
+        $blocks->prepend(['type' => 'methodology_showcase', 'data' => self::methodologyShowcase()]);
+
+        $page->forceFill(['blocks' => $blocks->all()])->saveQuietly();
+    }
+
+    /** Editable eHub methodology content arranged to mirror the source page's graphic composition. */
+    private static function methodologyShowcase(): array
+    {
+        return [
+            'eyebrow' => '04 · THE METHODOLOGY',
+            'heading' => 'The methodology: eHub NeLP®',
+            'intro' => 'Four learning experiences, each grounded in evidence.',
+            'about_heading' => 'ABOUT NeLP®',
+            'about_content' => 'NeLP® (Neuroscientific Learning Pattern) is a proprietary instructional-design method. It starts from the behaviour that must change and is founded on measurable cognitive constructs — cognitive load, working memory, spacing effect, testing effect, and dual coding — rather than “learning styles”. Its reference platform, NeLPx®, is built for frontline workers who learn on the job, not at a desk.',
+            'highlights' => [
+                ['title' => '−30% Time to Competence · +55% Retention Rate', 'text' => 'Laboratory studies; real-world validation in progress.', 'source' => 'Source: NeLP® laboratory studies'],
+                ['title' => 'First in Uganda — and first in Africa', 'text' => 'eHub is the first platform in Uganda and on the African continent to implement NeLP® end to end.', 'source' => 'A method designed around how learners actually learn and work.'],
+                ['title' => 'Best Methodology Award 2026', 'text' => 'Recognised at the Innovation Training Summit 2026.', 'source' => 'EFI'],
+                ['title' => 'Recognised internationally', 'text' => 'Selected for the UCL EdTech accelerator and named among the top 10 most innovative EdTech startups.', 'source' => 'UCL / Santander X (2024); EdTechX Awards (2024)'],
+            ],
+            'experiences' => [
+                ['number' => '01', 'title' => 'Generation of knowledge', 'text' => 'The learner starts from prior knowledge and real operational context; new understanding is generated, not received.', 'evidence' => 'Generation Effect (Slamecka & Graf, 1978); Bruner (1961).'],
+                ['number' => '02', 'title' => 'Contextualized exemplification', 'text' => 'Content is situated in a real operational scenario — a bakery, a care home, a job site — not an abstract rule.', 'evidence' => 'Transfer-Appropriate Processing (Morris, Bransford & Franks, 1977); Sweller (1988).'],
+                ['number' => '03', 'title' => 'Active reworking', 'text' => 'The learner decides, acts, and makes errors inside branching scenarios; error is part of the design.', 'evidence' => 'Desirable Difficulties (Bjork, 1994); Testing Effect (Roediger & Karpicke, 2006).'],
+                ['number' => '04', 'title' => 'Quick, spaced, generalizable training and certification', 'text' => 'Short sessions are sequenced on neuroscientific, not editorial, grounds, supporting retention without re-teaching and ending in a verified credential.', 'evidence' => 'Spacing Effect (Ebbinghaus, 1885; Cepeda et al., 2006); Alfonsi et al. (2020).'],
+            ],
+            'journey' => [
+                ['label' => 'Sign up'], ['label' => 'Get assessed'], ['label' => 'Learn adaptively'],
+                ['label' => 'Get certified'], ['label' => 'Get matched'], ['label' => 'Get placed'],
+            ],
+            'journey_note' => 'One learner, one platform, from first lesson to first paycheck. 8 weeks via eHub vs approximately 18 months on the traditional path.',
+        ];
     }
 }

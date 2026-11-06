@@ -21,7 +21,7 @@ use Illuminate\Support\Str;
 class PageBlocks
 {
     /** Block types the public site knows how to render. */
-    public const TYPES = ['hero', 'text', 'image_text', 'cards', 'stats', 'latest_posts', 'upcoming_events', 'cta_banner', 'newsletter'];
+    public const TYPES = ['hero', 'text', 'image_text', 'cards', 'stats', 'methodology_showcase', 'learner_journey', 'latest_posts', 'upcoming_events', 'cta_banner', 'newsletter'];
 
     public static function builder(string $name = 'blocks'): Builder
     {
@@ -86,6 +86,38 @@ class PageBlocks
                     TextInput::make('value')->required()->maxLength(20)->placeholder('25,000+'),
                     Textarea::make('label')->required()->rows(2)->maxLength(500)->placeholder('people trained'),
                 ])->columns(2)->minItems(1)->maxItems(4)->defaultItems(3),
+            ]),
+
+            Block::make('methodology_showcase')->label('NeLP methodology showcase')->icon(FaIcon::make('fa-diagram-project'))->schema([
+                TextInput::make('eyebrow')->label('Small label')->default('04 · THE METHODOLOGY')->maxLength(80),
+                TextInput::make('heading')->required()->maxLength(150),
+                Textarea::make('intro')->label('Subtitle')->rows(2)->maxLength(300),
+                TextInput::make('about_heading')->default('ABOUT NeLP®')->maxLength(100),
+                Textarea::make('about_content')->label('About the methodology')->rows(4)->maxLength(1200),
+                Repeater::make('highlights')->label('Highlights row')->schema([
+                    TextInput::make('title')->required()->maxLength(120),
+                    Textarea::make('text')->rows(2)->maxLength(350),
+                    TextInput::make('source')->maxLength(180),
+                ])->columns(1)->minItems(1)->maxItems(4)->defaultItems(4)->collapsible(),
+                Repeater::make('experiences')->label('Numbered learning experiences')->schema([
+                    TextInput::make('number')->required()->maxLength(4)->placeholder('01'),
+                    TextInput::make('title')->required()->maxLength(120),
+                    Textarea::make('text')->required()->rows(2)->maxLength(350),
+                    TextInput::make('evidence')->maxLength(220),
+                ])->columns(2)->minItems(1)->maxItems(6)->defaultItems(4)->collapsible(),
+                Repeater::make('journey')->label('Learner journey steps')->schema([
+                    TextInput::make('label')->required()->maxLength(60),
+                ])->columns(2)->minItems(2)->maxItems(8)->defaultItems(6)->collapsible(),
+                Textarea::make('journey_note')->label('Text under journey')->rows(2)->maxLength(300),
+            ]),
+
+            Block::make('learner_journey')->label('Learner journey timeline')->icon(FaIcon::make('fa-route'))->schema([
+                TextInput::make('heading')->default('THE LEARNER JOURNEY')->required()->maxLength(120),
+                Repeater::make('steps')->label('Journey steps')->schema([
+                    TextInput::make('label')->required()->maxLength(60),
+                ])->columns(2)->minItems(2)->maxItems(8)->defaultItems(6)->collapsible()
+                    ->default([['label' => 'Sign up'], ['label' => 'Get assessed'], ['label' => 'Learn adaptively'], ['label' => 'Get certified'], ['label' => 'Get matched'], ['label' => 'Get placed']]),
+                Textarea::make('note')->label('Supporting text')->rows(2)->maxLength(300),
             ]),
 
             Block::make('latest_posts')->label(self::label('Latest insights'))->icon(FaIcon::make('fa-newspaper'))->schema([
