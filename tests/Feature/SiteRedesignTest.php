@@ -288,6 +288,74 @@ class SiteRedesignTest extends TestCase
         $this->get('/admin')->assertOk()->assertSee('Muhame');
     }
 
+    public function test_admin_can_save_the_main_menu_and_footer_columns(): void
+    {
+        $this->seed();
+        $about = Page::query()->where('slug', 'about-us')->firstOrFail();
+        $this->actingAs(User::factory()->create()->assignRole('Admin'));
+
+        Livewire::test(ManageSiteSettings::class)
+            ->fillForm([
+                'main_menu' => [
+                    ['type' => 'page', 'page_id' => $about->id, 'label' => 'Company', 'children' => [
+                        ['type' => 'link', 'label' => 'Portal', 'url' => 'https://example.com/portal'],
+                    ]],
+                ],
+                'footer_columns' => [
+                    ['title' => 'Company', 'items' => [
+                        ['type' => 'page', 'page_id' => $about->id, 'label' => 'About us'],
+                    ]],
+                ],
+            ])
+            ->call('save')
+            ->assertHasNoFormErrors();
+
+        $settings = SiteSetting::query()->find(1);
+        $this->assertSame('Company', $settings->main_menu[0]['label']);
+        $this->assertSame('Portal', $settings->main_menu[0]['children'][0]['label']);
+        $this->assertSame('Company', $settings->footer_columns[0]['title']);
+    }
+
+    public function test_public_header_uses_the_menu_builder_with_dropdown_children(): void
+    {
+        $about = Page::factory()->create(['title' => 'About us', 'slug' => 'about-us']);
+        $team = Page::factory()->create(['title' => 'Our team', 'slug' => 'team']);
+
+        SiteSetting::current()->update(['main_menu' => [
+            ['type' => 'page', 'page_id' => $about->id, 'label' => 'Company', 'children' => [
+                ['type' => 'page', 'page_id' => $team->id, 'label' => 'Our team'],
+                ['type' => 'link', 'label' => 'Portal', 'url' => 'https://example.com/portal'],
+            ]],
+            ['type' => 'link', 'label' => 'Blogs', 'url' => '/insights'],
+        ]]);
+
+        $this->get('/contact')->assertOk()
+            ->assertSeeInOrder(['Company', 'Our team', 'Portal', 'Blogs'])
+            ->assertSee('href="'.url('/about-us').'"', false)
+            ->assertSee('href="'.url('/team').'"', false)
+            ->assertSee('href="https://example.com/portal"', false);
+    }
+
+    public function test_public_footer_uses_admin_defined_columns(): void
+    {
+        $about = Page::factory()->create(['title' => 'About us', 'slug' => 'about-us']);
+
+        SiteSetting::current()->update(['footer_columns' => [
+            ['title' => 'Company', 'items' => [
+                ['type' => 'page', 'page_id' => $about->id, 'label' => 'About us'],
+                ['type' => 'link', 'label' => 'Privacy', 'url' => '/privacy'],
+            ]],
+            ['title' => 'Resources', 'items' => [
+                ['type' => 'link', 'label' => 'Blogs', 'url' => '/insights'],
+            ]],
+        ]]);
+
+        $this->get('/contact')->assertOk()
+            ->assertSeeInOrder(['Company', 'About us', 'Privacy', 'Resources', 'Blogs'])
+            ->assertSee('href="/privacy"', false)
+            ->assertDontSee('Pages &amp; links', false);
+    }
+
     public function test_chosen_fonts_size_and_favicon_are_used_on_the_public_site(): void
     {
         SiteSetting::current()->update([

@@ -2,7 +2,8 @@
     $brand = $siteSettings->primaryColor();
     $ink = $siteSettings->accentColor();
     $logoUrl = \App\Support\Media::url($siteSettings->logo_path);
-    $menuLinks = $siteSettings->publicNavigationLinks();
+    $mainMenu = $siteSettings->publicMainMenu();
+    $footerColumns = $siteSettings->publicFooterColumns();
     $navLink = 'inline-flex items-center gap-1 rounded-md px-3 py-2 text-[0.95rem] font-semibold text-stone-800 hover:text-brand-dark focus-visible:outline-2 focus-visible:outline-brand';
     $pageHeaderLinkUrl = isset($page) && $page instanceof \App\Models\Page
         ? \App\Support\SafeUrl::clean($page->header_link_url, allowRelative: false)
@@ -49,37 +50,38 @@
             {{-- Desktop navigation --}}
             <nav aria-label="Main" class="ml-auto hidden lg:block">
                 <ul class="flex items-center gap-1">
-                    @foreach ($navigationPages as $navPage)
-                        @if ($navPage->children->isNotEmpty())
+                    @foreach ($mainMenu as $menuItem)
+                        @if (! empty($menuItem['children']))
                             <li class="group relative" data-dropdown>
                                 <button type="button" class="{{ $navLink }}" aria-expanded="false" aria-haspopup="true"
-                                    data-toggle="menu-{{ $navPage->id }}" data-group="dropdown">
-                                    {{ $navPage->title }}
+                                    data-toggle="menu-main-{{ $loop->index }}" data-group="dropdown">
+                                    {{ $menuItem['label'] }}
                                     <svg class="size-4 transition group-hover:rotate-180" viewBox="0 0 20 20" fill="currentColor" aria-hidden="true"><path fill-rule="evenodd" d="M5.23 7.21a.75.75 0 0 1 1.06.02L10 11.17l3.71-3.94a.75.75 0 1 1 1.08 1.04l-4.25 4.5a.75.75 0 0 1-1.08 0l-4.25-4.5a.75.75 0 0 1 .02-1.06Z" clip-rule="evenodd"/></svg>
                                 </button>
-                                <div id="menu-{{ $navPage->id }}" @class(['absolute left-1/2 top-full hidden -translate-x-1/2 pt-3 group-hover:block group-focus-within:block', 'w-[27rem]' => $navPage->children->count() <= 1, 'w-[34rem]' => $navPage->children->count() > 1])>
+                                <div id="menu-main-{{ $loop->index }}" @class(['absolute left-1/2 top-full hidden -translate-x-1/2 pt-3 group-hover:block group-focus-within:block', 'w-[27rem]' => count($menuItem['children']) <= 1, 'w-[34rem]' => count($menuItem['children']) > 1])>
                                     <div class="grid grid-cols-5 overflow-hidden rounded-2xl border border-stone-200 bg-white shadow-xl">
                                         <div class="col-span-2 bg-brand-soft p-6">
-                                            <a href="{{ $navPage->url() }}" class="text-lg font-bold text-stone-950 hover:text-brand-dark">{{ $navPage->title }}</a>
-                                            @if ($navPage->excerpt)
-                                                <p class="mt-2 text-sm leading-6 text-stone-600">{{ \Illuminate\Support\Str::limit($navPage->excerpt, 110) }}</p>
+                                            <a href="{{ $menuItem['url'] }}" class="text-lg font-bold text-stone-950 hover:text-brand-dark"
+                                                @if (\App\Support\SafeUrl::isExternal($menuItem['url'])) target="_blank" rel="noopener noreferrer" @endif>{{ $menuItem['label'] }}</a>
+                                            @if (filled($menuItem['description'] ?? null))
+                                                <p class="mt-2 text-sm leading-6 text-stone-600">{{ \Illuminate\Support\Str::limit($menuItem['description'], 110) }}</p>
                                             @endif
-                                            <a href="{{ $navPage->url() }}" class="mt-4 inline-flex items-center gap-1 text-sm font-semibold text-brand-dark">Overview <span aria-hidden="true">&rarr;</span></a>
+                                            <a href="{{ $menuItem['url'] }}" class="mt-4 inline-flex items-center gap-1 text-sm font-semibold text-brand-dark"
+                                                @if (\App\Support\SafeUrl::isExternal($menuItem['url'])) target="_blank" rel="noopener noreferrer" @endif>Overview <span aria-hidden="true">&rarr;</span></a>
                                         </div>
                                         <ul class="col-span-3 space-y-1 p-4">
-                                            @foreach ($navPage->children as $child)
-                                                <li><a href="{{ $child->url() }}" class="block rounded-lg px-3 py-2 text-[0.95rem] font-medium text-stone-700 hover:bg-stone-100 hover:text-stone-950">{{ $child->title }}</a></li>
+                                            @foreach ($menuItem['children'] as $child)
+                                                <li><a href="{{ $child['url'] }}" class="block rounded-lg px-3 py-2 text-[0.95rem] font-medium text-stone-700 hover:bg-stone-100 hover:text-stone-950"
+                                                    @if (\App\Support\SafeUrl::isExternal($child['url'])) target="_blank" rel="noopener noreferrer" @endif>{{ $child['label'] }}</a></li>
                                             @endforeach
                                         </ul>
                                     </div>
                                 </div>
                             </li>
                         @else
-                            <li><a href="{{ $navPage->url() }}" class="{{ $navLink }}" @if (url()->current() === $navPage->url()) aria-current="page" @endif>{{ $navPage->title }}</a></li>
+                            <li><a href="{{ $menuItem['url'] }}" class="{{ $navLink }}" @if (url()->current() === $menuItem['url']) aria-current="page" @endif
+                                @if (\App\Support\SafeUrl::isExternal($menuItem['url'])) target="_blank" rel="noopener noreferrer" @endif>{{ $menuItem['label'] }}</a></li>
                         @endif
-                    @endforeach
-                    @foreach ($menuLinks as $label => $url)
-                        <li><a href="{{ $url }}" class="{{ $navLink }}" @if (\App\Support\SafeUrl::isExternal($url)) target="_blank" rel="noopener noreferrer" @endif>{{ $label }}</a></li>
                     @endforeach
                 </ul>
             </nav>
@@ -117,20 +119,19 @@
         {{-- Mobile menu --}}
         <nav id="mobile-menu" aria-label="Main" class="hidden max-h-[calc(100vh-5rem)] overflow-y-auto border-t border-stone-200 bg-white lg:hidden">
             <ul class="space-y-1 px-5 py-4">
-                @foreach ($navigationPages as $navPage)
+                @foreach ($mainMenu as $menuItem)
                     <li>
-                        <a href="{{ $navPage->url() }}" class="block rounded-lg px-3 py-3 text-lg font-semibold text-stone-900 hover:bg-stone-100">{{ $navPage->title }}</a>
-                        @if ($navPage->children->isNotEmpty())
+                        <a href="{{ $menuItem['url'] }}" class="block rounded-lg px-3 py-3 text-lg font-semibold text-stone-900 hover:bg-stone-100"
+                            @if (\App\Support\SafeUrl::isExternal($menuItem['url'])) target="_blank" rel="noopener noreferrer" @endif>{{ $menuItem['label'] }}</a>
+                        @if (! empty($menuItem['children']))
                             <ul class="mb-2 ml-3 border-l-2 border-brand-soft pl-3">
-                                @foreach ($navPage->children as $child)
-                                    <li><a href="{{ $child->url() }}" class="block rounded-lg px-3 py-2 text-stone-600 hover:bg-stone-100 hover:text-stone-900">{{ $child->title }}</a></li>
+                                @foreach ($menuItem['children'] as $child)
+                                    <li><a href="{{ $child['url'] }}" class="block rounded-lg px-3 py-2 text-stone-600 hover:bg-stone-100 hover:text-stone-900"
+                                        @if (\App\Support\SafeUrl::isExternal($child['url'])) target="_blank" rel="noopener noreferrer" @endif>{{ $child['label'] }}</a></li>
                                 @endforeach
                             </ul>
                         @endif
                     </li>
-                @endforeach
-                @foreach ($menuLinks as $label => $url)
-                    <li><a href="{{ $url }}" class="block rounded-lg px-3 py-3 text-lg font-semibold text-stone-900 hover:bg-stone-100">{{ $label }}</a></li>
                 @endforeach
                 @if ($pageHeaderLinkUrl)
                     <li class="pt-3"><a href="{{ $pageHeaderLinkUrl }}" class="block rounded-full bg-brand px-5 py-3 text-center font-semibold text-brand-fg hover:bg-brand-dark"
@@ -163,34 +164,52 @@
                 @endif
             </div>
 
-            <div class="grid gap-10 sm:grid-cols-2 lg:col-span-4">
-                <div>
-                    <h2 class="text-sm font-semibold uppercase tracking-[0.16em] opacity-70">Explore</h2>
-                    <ul class="mt-4 space-y-2.5">
-                        @foreach ($siteSettings->publicExplorePages() as $explorePage)
-                            <li><a href="{{ $explorePage->url() }}" class="opacity-90 hover:opacity-100">{{ $explorePage->title }}</a></li>
-                        @endforeach
-                        @foreach ($siteSettings->publicExploreLinks() as $label => $url)
-                            <li><a href="{{ $url }}" class="opacity-90 hover:opacity-100">{{ $label }}</a></li>
-                        @endforeach
-                    </ul>
+            @if ($footerColumns)
+                <div class="grid gap-10 sm:grid-cols-2 lg:col-span-4">
+                    @foreach ($footerColumns as $column)
+                        <div>
+                            @if (filled($column['title']))
+                                <h2 class="text-sm font-semibold uppercase tracking-[0.16em] opacity-70">{{ $column['title'] }}</h2>
+                            @endif
+                            <ul class="mt-4 space-y-2.5">
+                                @foreach ($column['items'] as $item)
+                                    <li><a href="{{ $item['url'] }}" class="opacity-90 hover:opacity-100"
+                                        @if (\App\Support\SafeUrl::isExternal($item['url'])) target="_blank" rel="noopener noreferrer" @endif>{{ $item['label'] }}</a></li>
+                                @endforeach
+                            </ul>
+                        </div>
+                    @endforeach
                 </div>
-                @php($footerPages = $siteSettings->publicFooterPages())
-                @php($footerLinks = $siteSettings->publicFooterLinks())
-                @if ($footerPages->isNotEmpty() || $footerLinks)
+            @else
+                <div class="grid gap-10 sm:grid-cols-2 lg:col-span-4">
                     <div>
-                        <h2 class="text-sm font-semibold uppercase tracking-[0.16em] opacity-70">Pages & links</h2>
+                        <h2 class="text-sm font-semibold uppercase tracking-[0.16em] opacity-70">Explore</h2>
                         <ul class="mt-4 space-y-2.5">
-                            @foreach ($footerPages as $footerPage)
-                                <li><a href="{{ $footerPage->url() }}" class="opacity-90 hover:opacity-100">{{ $footerPage->title }}</a></li>
+                            @foreach ($siteSettings->publicExplorePages() as $explorePage)
+                                <li><a href="{{ $explorePage->url() }}" class="opacity-90 hover:opacity-100">{{ $explorePage->title }}</a></li>
                             @endforeach
-                            @foreach ($footerLinks as $label => $url)
-                                <li><a href="{{ $url }}" class="opacity-90 hover:opacity-100" @if (\App\Support\SafeUrl::isExternal($url)) target="_blank" rel="noopener noreferrer" @endif>{{ $label }}</a></li>
+                            @foreach ($siteSettings->publicExploreLinks() as $label => $url)
+                                <li><a href="{{ $url }}" class="opacity-90 hover:opacity-100">{{ $label }}</a></li>
                             @endforeach
                         </ul>
                     </div>
-                @endif
-            </div>
+                    @php($footerPages = $siteSettings->publicFooterPages())
+                    @php($footerLinks = $siteSettings->publicFooterLinks())
+                    @if ($footerPages->isNotEmpty() || $footerLinks)
+                        <div>
+                            <h2 class="text-sm font-semibold uppercase tracking-[0.16em] opacity-70">Pages & links</h2>
+                            <ul class="mt-4 space-y-2.5">
+                                @foreach ($footerPages as $footerPage)
+                                    <li><a href="{{ $footerPage->url() }}" class="opacity-90 hover:opacity-100">{{ $footerPage->title }}</a></li>
+                                @endforeach
+                                @foreach ($footerLinks as $label => $url)
+                                    <li><a href="{{ $url }}" class="opacity-90 hover:opacity-100" @if (\App\Support\SafeUrl::isExternal($url)) target="_blank" rel="noopener noreferrer" @endif>{{ $label }}</a></li>
+                                @endforeach
+                            </ul>
+                        </div>
+                    @endif
+                </div>
+            @endif
 
             <div id="newsletter" class="scroll-mt-28 lg:col-span-4">
                 <h2 class="text-xl font-bold">{{ $siteSettings->newsletterHeading() }}</h2>

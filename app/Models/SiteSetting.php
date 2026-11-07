@@ -10,8 +10,8 @@ use Illuminate\Support\Collection;
 
 #[Fillable([
     'site_name', 'tagline', 'homepage_title', 'homepage_description', 'contact_email', 'logo_path',
-    'navigation_links', 'social_links', 'primary_color', 'accent_color', 'footer_text', 'footer_links', 'footer_pages',
-    'explore_pages', 'explore_links',
+    'navigation_links', 'main_menu', 'social_links', 'primary_color', 'accent_color', 'footer_text', 'footer_links', 'footer_pages',
+    'footer_columns', 'explore_pages', 'explore_links',
     'newsletter_heading', 'newsletter_text', 'favicon_path', 'body_font', 'heading_font', 'base_font_size',
     'contact_phone', 'contact_address', 'office_hours', 'map_location', 'map_embed_url',
     'header_display', 'primary_text_color',
@@ -62,9 +62,11 @@ class SiteSetting extends Model
     {
         return [
             'navigation_links' => 'array',
+            'main_menu' => 'array',
             'social_links' => 'array',
             'footer_links' => 'array',
             'footer_pages' => 'array',
+            'footer_columns' => 'array',
             'explore_pages' => 'array',
             'explore_links' => 'array',
         ];
@@ -86,9 +88,11 @@ class SiteSetting extends Model
             'contact_email' => null,
             'logo_path' => null,
             'navigation_links' => [],
+            'main_menu' => null,
             'social_links' => [],
             'footer_links' => [],
             'footer_pages' => [],
+            'footer_columns' => null,
             'explore_pages' => [],
             'explore_links' => ['insights', 'events', 'contact'],
         ];
@@ -276,6 +280,156 @@ class SiteSetting extends Model
     public function newsletterText(): string
     {
         return $this->newsletter_text ?: 'Get our latest insights and upcoming events in your inbox.';
+    }
+
+    /**
+     * The top menu, built from the admin's menu builder when one is set.
+     * Falls back to pages marked "Show in site menu" plus extra links.
+     *
+     * @return array<int, array{label: string, url: string, description: ?string, children: array<int, array{label: string, url: string, description: ?string}>}>
+     */
+    public function publicMainMenu(): array
+    {
+        $configured = $this->resolveMenuItems($this->main_menu ?? []);
+
+        if ($configured !== []) {
+            return $configured;
+        }
+
+        $items = Page::query()->inNavigation()->get()
+            ->map(fn (Page $page) => [
+                'label' => $page->title,
+                'url' => $page->url(),
+                'description' => $page->excerpt,
+                'children' => $page->children->map(fn (Page $child) => [
+                    'label' => $child->title,
+                    'url' => $child->url(),
+                    'description' => $child->excerpt,
+                ])->all(),
+            ])
+            ->all();
+
+        foreach ($this->publicNavigationLinks() as $label => $url) {
+            $items[] = ['label' => $label, 'url' => $url, 'description' => null, 'children' => []];
+        }
+
+        return $items;
+    }
+
+    /**
+     * Footer link columns configured in Site settings. When empty, the layout
+     * falls back to the original Explore / Pages & links columns.
+     *
+     * @return array<int, array{title: string, items: array<int, array{label: string, url: string}>}>
+     */
+    public function publicFooterColumns(): array
+    {
+        $columns = $this->footer_columns ?? [];
+
+        if (! is_array($columns) || $columns === []) {
+            return [];
+        }
+
+        $pages = $this->publishedPagesById();
+        $resolved = [];
+
+        foreach ($columns as $column) {
+            if (! is_array($column)) {
+                continue;
+            }
+
+            $title = trim((string) ($column['title'] ?? ''));
+            $items = [];
+
+            foreach (($column['items'] ?? []) as $item) {
+                if (! is_array($item)) {
+                    continue;
+                }
+
+                if ($entry = $this->resolveMenuItem($item, $pages)) {
+                    $items[] = ['label' => $entry['label'], 'url' => $entry['url']];
+                }
+            }
+
+            if ($title !== '' || $items !== []) {
+                $resolved[] = ['title' => $title, 'items' => $items];
+            }
+        }
+
+        return $resolved;
+    }
+
+    /**
+     * @param  array<mixed>  $items
+     * @return array<int, array{label: string, url: string, description: ?string, children: array<int, array{label: string, url: string, description: ?string}>}>
+     */
+    private function resolveMenuItems(array $items): array
+    {
+        if ($items === []) {
+            return [];
+        }
+
+        $pages = $this->publishedPagesById();
+        $menu = [];
+
+        foreach ($items as $item) {
+            if (! is_array($item) || ! ($entry = $this->resolveMenuItem($item, $pages))) {
+                continue;
+            }
+
+            $children = [];
+
+            foreach (($item['children'] ?? []) as $child) {
+                if (is_array($child) && ($childEntry = $this->resolveMenuItem($child, $pages))) {
+                    $children[] = [
+                        'label' => $childEntry['label'],
+                        'url' => $childEntry['url'],
+                        'description' => $childEntry['description'],
+                    ];
+                }
+            }
+
+            $entry['children'] = $children;
+            $menu[] = $entry;
+        }
+
+        return $menu;
+    }
+
+    /**
+     * A menu item is either a published page or a safe custom link.
+     *
+     * @param  Collection<int, Page>  $pages
+     * @return array{label: string, url: string, description: ?string}|null
+     */
+    private function resolveMenuItem(array $item, Collection $pages): ?array
+    {
+        if (($item['type'] ?? 'page') === 'link') {
+            $label = trim((string) ($item['label'] ?? ''));
+            $url = SafeUrl::clean($item['url'] ?? null);
+
+            return $label !== '' && $url ? ['label' => $label, 'url' => $url, 'description' => null] : null;
+        }
+
+        $page = $pages->get((int) ($item['page_id'] ?? 0));
+
+        if (! $page) {
+            return null;
+        }
+
+        $label = trim((string) ($item['label'] ?? ''));
+
+        return [
+            'label' => $label !== '' ? $label : $page->title,
+            'url' => $page->url(),
+            'description' => $page->excerpt,
+        ];
+    }
+
+    /** @return Collection<int, Page> */
+    private function publishedPagesById(): Collection
+    {
+        return Page::query()->published()->get()->keyBy('id');
     }
 
     /** @return array<string, string> */

@@ -40,6 +40,7 @@ class StarterHomepageSeeder extends Seeder
         }
 
         $this->addBlogsNavigationLink();
+        $this->addMenuBuilders();
     }
 
     /**
@@ -152,6 +153,73 @@ class StarterHomepageSeeder extends Seeder
         }
 
         $settings->forceFill(['navigation_links' => [...$links, 'Blogs' => '/insights']])->saveQuietly();
+    }
+
+    /**
+     * Pre-fill the admin menu builders once, using the grouped pages above.
+     * Editors can then reorder, relabel, or replace every item in Site settings.
+     */
+    private function addMenuBuilders(): void
+    {
+        $settings = SiteSetting::current();
+
+        if ($settings->main_menu === null) {
+            $menu = [];
+
+            foreach (['about-us', 'solution', 'our-method'] as $slug) {
+                $page = Page::query()->where('slug', $slug)->first();
+
+                if (! $page) {
+                    continue;
+                }
+
+                $children = Page::query()
+                    ->where('parent_id', $page->getKey())
+                    ->where('status', 'published')
+                    ->orderBy('navigation_order')
+                    ->orderBy('title')
+                    ->get()
+                    ->map(fn (Page $child) => [
+                        'type' => 'page',
+                        'page_id' => $child->getKey(),
+                        'label' => $child->title,
+                    ])
+                    ->all();
+
+                $menu[] = [
+                    'type' => 'page',
+                    'page_id' => $page->getKey(),
+                    'label' => $page->title,
+                    'children' => $children,
+                ];
+            }
+
+            $menu[] = ['type' => 'link', 'label' => 'Blogs', 'url' => '/insights'];
+            $settings->main_menu = $menu;
+        }
+
+        if ($settings->footer_columns === null) {
+            $footerPages = collect(['about-us', 'solution', 'our-method', 'our-team'])
+                ->map(function (string $slug): ?array {
+                    $page = Page::query()->where('slug', $slug)->where('status', 'published')->first();
+
+                    return $page ? ['type' => 'page', 'page_id' => $page->getKey(), 'label' => $page->title] : null;
+                })
+                ->filter()
+                ->values()
+                ->all();
+
+            $settings->footer_columns = [
+                ['title' => 'Explore', 'items' => [
+                    ['type' => 'link', 'label' => 'Blogs', 'url' => '/insights'],
+                    ['type' => 'link', 'label' => 'Events', 'url' => '/events'],
+                    ['type' => 'link', 'label' => 'Contact', 'url' => '/contact'],
+                ]],
+                ['title' => 'Pages & links', 'items' => $footerPages],
+            ];
+        }
+
+        $settings->saveQuietly();
     }
 
     /** @return array<int, array<string, mixed>> */

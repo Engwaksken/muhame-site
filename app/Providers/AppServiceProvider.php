@@ -2,12 +2,12 @@
 
 namespace App\Providers;
 
-use App\Models\SiteSetting;
 use App\Models\Category;
 use App\Models\ContactMessage;
 use App\Models\Event;
 use App\Models\Page;
 use App\Models\Post;
+use App\Models\SiteSetting;
 use App\Models\Subscriber;
 use App\Models\Tag;
 use App\Models\User;
@@ -60,7 +60,6 @@ class AppServiceProvider extends ServiceProvider
         // one set of queries per request, however many views use it.
         View::composer(['layouts.public', 'public.*'], function ($view): void {
             $view->with(once(fn () => [
-                'navigationPages' => Page::query()->inNavigation()->get(),
                 'navigationCategories' => Category::query()
                     ->whereHas('posts', fn (Builder $query) => $query->published())
                     ->orderBy('name')

@@ -3,15 +3,16 @@
 namespace App\Filament\Resources\SiteSettings;
 
 use App\Filament\Resources\SiteSettings\Pages\ManageSiteSettings;
-use App\Models\SiteSetting;
 use App\Models\Page;
+use App\Models\SiteSetting;
 use App\Support\FaIcon;
-use BackedEnum;
+use App\Support\SafeUrl;
 use Closure;
 use Filament\Forms\Components\ColorPicker;
 use Filament\Forms\Components\FileUpload;
 use Filament\Forms\Components\KeyValue;
 use Filament\Forms\Components\Radio;
+use Filament\Forms\Components\Repeater;
 use Filament\Forms\Components\Select;
 use Filament\Forms\Components\Textarea;
 use Filament\Forms\Components\TextInput;
@@ -19,7 +20,9 @@ use Filament\Resources\Resource;
 use Filament\Schemas\Components\Section;
 use Filament\Schemas\Components\Tabs;
 use Filament\Schemas\Components\Tabs\Tab;
+use Filament\Schemas\Components\Utilities\Get;
 use Filament\Schemas\Schema;
+use Illuminate\Contracts\Support\Htmlable;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Model;
 
@@ -33,7 +36,10 @@ class SiteSettingResource extends Resource
 
     protected static string|\UnitEnum|null $navigationGroup = 'Site';
 
-    public static function getNavigationIcon(): \Illuminate\Contracts\Support\Htmlable { return FaIcon::make('fa-gear'); }
+    public static function getNavigationIcon(): Htmlable
+    {
+        return FaIcon::make('fa-gear');
+    }
 
     protected static ?int $navigationSort = 10;
 
@@ -138,32 +144,55 @@ class SiteSettingResource extends Resource
                             ]),
                     ]),
 
-                    Tab::make('Menu')->icon(FaIcon::make('fa-bars'))->schema([
-                        KeyValue::make('navigation_links')->label('Extra menu links')
-                            ->helperText('Pages marked "Show in site menu" appear automatically. Add other links here, e.g. to a partner site.')
-                            ->keyLabel('Link label')->valueLabel('URL or path')
-                            ->keyPlaceholder('Shop')->valuePlaceholder('/shop or https://example.com')
-                            ->reorderable(),
+                    Tab::make('Main menu')->icon(FaIcon::make('fa-bars'))->schema([
+                        Repeater::make('main_menu')->label('Main menu items')
+                            ->schema(self::menuItemFields(withChildren: true))
+                            ->columns(2)->collapsible()->cloneable()
+                            ->itemLabel(fn (array $state): ?string => $state['label'] ?? null)
+                            ->addActionLabel('Add menu item')->reorderable()->columnSpanFull()
+                            ->helperText('Build the top menu here. Add an item, then add dropdown items under it for a sub-menu. If this is empty, pages marked "Show in site menu" are used automatically.'),
+                        Section::make('Fallback menu links')->collapsed()
+                            ->description('Used only when the main menu above is empty.')
+                            ->schema([
+                                KeyValue::make('navigation_links')->label('Extra menu links')
+                                    ->keyLabel('Link label')->valueLabel('URL or path')
+                                    ->keyPlaceholder('Shop')->valuePlaceholder('/shop or https://example.com')
+                                    ->reorderable(),
+                            ]),
                     ]),
 
                     Tab::make('Footer & social')->icon(FaIcon::make('fa-layer-group'))->schema([
                         Textarea::make('footer_text')->label('Footer about text')->rows(3)->maxLength(500)
                             ->helperText('A short description or address shown in the footer.'),
-                        Select::make('explore_pages')->label('Pages in Explore')->multiple()->searchable()->preload()
-                            ->options(fn () => Page::query()->published()->orderBy('title')->pluck('title', 'id')->all())
-                            ->helperText('Select published pages for the Explore group in the footer.'),
-                        Select::make('explore_links')->label('Built-in Explore links')->multiple()
-                            ->options(['insights' => 'Insights', 'events' => 'Events', 'contact' => 'Contact'])
-                            ->default(['insights', 'events', 'contact'])
-                            ->formatStateUsing(fn (?array $state) => $state ?? ['insights', 'events', 'contact'])
-                            ->helperText('Choose which built-in links appear alongside the selected pages.'),
-                        Select::make('footer_pages')->label('Pages in footer')->multiple()->searchable()->preload()
-                            ->options(fn () => Page::query()->published()->orderBy('title')->pluck('title', 'id')->all())
-                            ->helperText('Choose which published pages appear in the footer. Unpublished pages are hidden automatically.'),
-                        KeyValue::make('footer_links')->label('Footer links')
-                            ->keyLabel('Link label')->valueLabel('URL or path')
-                            ->keyPlaceholder('Privacy policy')->valuePlaceholder('/privacy')
-                            ->reorderable(),
+                        Repeater::make('footer_columns')->label('Footer columns')
+                            ->schema([
+                                TextInput::make('title')->label('Column title')->required()->maxLength(60)
+                                    ->placeholder('Explore'),
+                                Repeater::make('items')->label('Links in this column')
+                                    ->schema(self::menuItemFields())
+                                    ->columns(2)->collapsible()->cloneable()
+                                    ->itemLabel(fn (array $state): ?string => $state['label'] ?? null)
+                                    ->addActionLabel('Add link')->maxItems(20)->columnSpanFull(),
+                            ])->collapsible()->cloneable()
+                            ->itemLabel(fn (array $state): ?string => $state['title'] ?? null)
+                            ->addActionLabel('Add footer column')->maxItems(4)->columnSpanFull()
+                            ->helperText('Each column has an editable title and its own list of page links or custom links.'),
+                        Section::make('Fallback footer links')->collapsed()
+                            ->description('Used only when no footer columns are set above.')
+                            ->schema([
+                                Select::make('explore_pages')->label('Pages in Explore')->multiple()->searchable()->preload()
+                                    ->options(fn () => Page::query()->published()->orderBy('title')->pluck('title', 'id')->all()),
+                                Select::make('explore_links')->label('Built-in Explore links')->multiple()
+                                    ->options(['insights' => 'Insights', 'events' => 'Events', 'contact' => 'Contact'])
+                                    ->default(['insights', 'events', 'contact'])
+                                    ->formatStateUsing(fn (?array $state) => $state ?? ['insights', 'events', 'contact']),
+                                Select::make('footer_pages')->label('Pages in footer')->multiple()->searchable()->preload()
+                                    ->options(fn () => Page::query()->published()->orderBy('title')->pluck('title', 'id')->all()),
+                                KeyValue::make('footer_links')->label('Footer links')
+                                    ->keyLabel('Link label')->valueLabel('URL or path')
+                                    ->keyPlaceholder('Privacy policy')->valuePlaceholder('/privacy')
+                                    ->reorderable(),
+                            ]),
                         KeyValue::make('social_links')->label('Social profiles')
                             ->keyLabel('Network')->valueLabel('Profile URL')
                             ->keyPlaceholder('LinkedIn')->valuePlaceholder('https://…')
@@ -177,6 +206,56 @@ class SiteSettingResource extends Resource
                     ]),
                 ]),
             ]);
+    }
+
+    /**
+     * Shared fields for a main-menu item or footer link.
+     *
+     * @return array<int, mixed>
+     */
+    private static function menuItemFields(bool $withChildren = false): array
+    {
+        $fields = [
+            Select::make('type')->options(['page' => 'Page', 'link' => 'Custom link'])
+                ->default('page')->selectablePlaceholder(false)->live()->required(),
+            Select::make('page_id')->label('Page')
+                ->options(fn (): array => static::pageOptions())
+                ->searchable()->preload()
+                ->visible(fn (Get $get): bool => ($get('type') ?? 'page') === 'page')
+                ->required(fn (Get $get): bool => ($get('type') ?? 'page') === 'page'),
+            TextInput::make('label')->label('Label')->maxLength(60)
+                ->helperText('Leave blank to use the page title. Required for custom links.')
+                ->required(fn (Get $get): bool => ($get('type') ?? 'page') === 'link'),
+            TextInput::make('url')->label('URL or path')->maxLength(255)
+                ->placeholder('/contact or https://example.com')
+                ->visible(fn (Get $get): bool => ($get('type') ?? 'page') === 'link')
+                ->required(fn (Get $get): bool => ($get('type') ?? 'page') === 'link')
+                ->rules([fn () => function (string $attribute, mixed $value, Closure $fail): void {
+                    if (filled($value) && SafeUrl::clean($value) === null) {
+                        $fail('Use a full https:// link, a path starting with /, or a #anchor.');
+                    }
+                }]),
+        ];
+
+        if ($withChildren) {
+            $fields[] = Repeater::make('children')->label('Dropdown items')
+                ->schema(self::menuItemFields())
+                ->columns(2)->collapsible()->cloneable()
+                ->itemLabel(fn (array $state): ?string => $state['label'] ?? null)
+                ->addActionLabel('Add dropdown item')->maxItems(12)->columnSpanFull();
+        }
+
+        return $fields;
+    }
+
+    /** @return array<int, string> */
+    private static function pageOptions(): array
+    {
+        return Page::query()->orderBy('title')->get()
+            ->mapWithKeys(fn (Page $page): array => [
+                $page->getKey() => $page->title.($page->status === 'published' ? '' : ' (draft)'),
+            ])
+            ->all();
     }
 
     public static function getPages(): array
