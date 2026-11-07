@@ -268,7 +268,7 @@ class SiteRedesignTest extends TestCase
                 'title' => 'Icon cards', 'slug' => 'icon-cards', 'status' => 'published',
                 'blocks' => [['type' => 'cards', 'data' => ['columns' => '2', 'cards' => [
                     ['title' => 'Research', 'icon' => 'fa-leaf', 'alignment' => 'center', 'source' => 'Field notes'],
-                    ['title' => 'No source', 'alignment' => 'left'],
+                    ['text' => 'A card without a title', 'alignment' => 'left', 'url' => '/contact'],
                 ]]]],
             ])
             ->call('create')
@@ -278,6 +278,7 @@ class SiteRedesignTest extends TestCase
         $this->assertSame('fa-leaf', $page->blocks[0]['data']['cards'][0]['icon']);
         $this->assertSame('center', $page->blocks[0]['data']['cards'][0]['alignment']);
         $this->assertSame('Field notes', $page->blocks[0]['data']['cards'][0]['source']);
+        $this->get('/icon-cards')->assertOk()->assertSee('A card without a title');
     }
 
     public function test_text_section_can_be_saved_without_a_heading_or_content(): void

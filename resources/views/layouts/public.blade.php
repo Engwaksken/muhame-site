@@ -39,14 +39,21 @@
 
     {{-- Header --}}
     <header class="sticky top-0 z-40 border-b border-stone-200 bg-white/95 backdrop-blur">
-        <div class="mx-auto flex h-20 max-w-7xl items-center gap-6 px-5 sm:px-8">
+        <div data-top-header class="mx-auto flex min-h-20 max-w-7xl items-center justify-between gap-4 px-5 py-3 sm:px-8">
             <a href="{{ route('home') }}" class="flex min-w-0 shrink-0 items-center gap-3 text-xl font-bold tracking-tight text-stone-950">
                 @if ($logoUrl && $siteSettings->headerShowsLogo())
                     <img src="{{ $logoUrl }}" alt="" class="h-12 w-auto max-w-56 object-contain sm:h-14">
                 @endif
                 <span @class(['sr-only' => ! $siteSettings->headerShowsName(), 'truncate'])>{{ $siteSettings->site_name }}</span>
             </a>
+            <a href="{{ $pageHeaderLinkUrl ?: route('contact') }}" class="inline-flex shrink-0 items-center justify-center rounded-full bg-brand px-4 py-2.5 text-sm font-semibold text-brand-fg hover:bg-brand-dark sm:px-5"
+                @if ($pageHeaderLinkUrl && \App\Support\SafeUrl::isExternal($pageHeaderLinkUrl)) target="_blank" rel="noopener noreferrer" @endif>
+                {{ $pageHeaderLinkUrl ? $pageHeaderLinkLabel : 'Contact us' }}
+            </a>
+        </div>
 
+        <div data-main-menu class="border-t border-stone-100">
+        <div class="mx-auto flex min-h-12 max-w-7xl items-center gap-4 px-5 sm:px-8">
             {{-- Desktop navigation --}}
             <nav aria-label="Main" class="ml-auto hidden lg:block">
                 <ul class="flex items-center gap-1">
@@ -91,19 +98,12 @@
                     <span class="sr-only">Search</span>
                     <svg class="size-5" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" aria-hidden="true"><path stroke-linecap="round" stroke-linejoin="round" d="m21 21-4.35-4.35M17 10.5a6.5 6.5 0 1 1-13 0 6.5 6.5 0 0 1 13 0Z"/></svg>
                 </button>
-                @if ($pageHeaderLinkUrl)
-                    <a href="{{ $pageHeaderLinkUrl }}" class="hidden shrink-0 items-center justify-center rounded-full bg-brand px-5 py-2.5 text-sm font-semibold text-brand-fg hover:bg-brand-dark sm:inline-flex"
-                        @if (\App\Support\SafeUrl::isExternal($pageHeaderLinkUrl)) target="_blank" rel="noopener noreferrer" @endif>
-                        {{ $pageHeaderLinkLabel }}
-                    </a>
-                @else
-                    <a href="{{ route('contact') }}" class="hidden rounded-full bg-brand px-5 py-2.5 text-sm font-semibold text-brand-fg hover:bg-brand-dark sm:inline-flex">Contact us</a>
-                @endif
                 <button type="button" class="rounded-full p-2.5 text-stone-800 hover:bg-stone-100 lg:hidden" aria-expanded="false" aria-controls="mobile-menu" data-toggle="mobile-menu">
                     <span class="sr-only">Menu</span>
                     <svg class="size-6" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" aria-hidden="true"><path stroke-linecap="round" d="M4 7h16M4 12h16M4 17h16"/></svg>
                 </button>
             </div>
+        </div>
         </div>
 
         {{-- Search panel --}}
@@ -117,7 +117,7 @@
         </div>
 
         {{-- Mobile menu --}}
-        <nav id="mobile-menu" aria-label="Main" class="hidden max-h-[calc(100vh-5rem)] overflow-y-auto border-t border-stone-200 bg-white lg:hidden">
+        <nav id="mobile-menu" aria-label="Main" class="hidden max-h-[calc(100dvh-8rem)] overflow-y-auto border-t border-stone-200 bg-white lg:hidden">
             <ul class="space-y-1 px-5 py-4">
                 @foreach ($mainMenu as $menuItem)
                     <li>

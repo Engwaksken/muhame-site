@@ -76,7 +76,7 @@ class PageBlocks
                         ->helperText('Font Awesome solid icon name, e.g. fa-users, fa-leaf or fa-graduation-cap.'),
                     Select::make('alignment')->label('Content alignment')
                         ->options(['left' => 'Left', 'center' => 'Center', 'right' => 'Right'])->default('left'),
-                    TextInput::make('title')->required()->maxLength(120),
+                    TextInput::make('title')->maxLength(120),
                     Textarea::make('text')->rows(2),
                     Textarea::make('source')->label('Source text (optional)')->rows(2)->maxLength(300)
                         ->helperText('A citation or credit displayed beneath the card text.'),

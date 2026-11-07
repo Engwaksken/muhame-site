@@ -31,6 +31,7 @@
                     @if (! $cardImage && $cardIcon)
                         <i class="fas {{ $cardIcon }} {{ $iconAlignment }} mb-4 text-4xl text-brand-dark" aria-hidden="true"></i>
                     @endif
+                    @if (filled($card['title'] ?? null))
                     <h3 class="text-2xl font-bold leading-snug text-stone-950">
                         @if ($cardUrl)
                             <a href="{{ $cardUrl }}" class="after:absolute after:inset-0 group-hover:text-brand-dark" @if (\App\Support\SafeUrl::isExternal($cardUrl)) target="_blank" rel="noopener noreferrer" @endif>{{ $card['title'] ?? '' }}</a>
@@ -38,6 +39,7 @@
                             {{ $card['title'] ?? '' }}
                         @endif
                     </h3>
+                    @endif
                     @if (filled($card['text'] ?? null))
                         <p class="mt-2 text-lg leading-8 text-stone-600">{{ $card['text'] }}</p>
                     @endif
@@ -45,7 +47,11 @@
                         <p class="mt-3 text-sm leading-6 text-stone-500">{{ $card['source'] }}</p>
                     @endif
                     @if ($cardUrl)
-                        <span class="{{ $iconAlignment }} mt-auto inline-flex items-center gap-1 pt-5 font-semibold text-brand-dark">{{ filled($card['link_label'] ?? null) ? $card['link_label'] : 'Read more' }} <span aria-hidden="true">&rarr;</span></span>
+                        @if (filled($card['title'] ?? null))
+                            <span class="{{ $iconAlignment }} mt-auto inline-flex items-center gap-1 pt-5 font-semibold text-brand-dark">{{ filled($card['link_label'] ?? null) ? $card['link_label'] : 'Read more' }} <span aria-hidden="true">&rarr;</span></span>
+                        @else
+                            <a href="{{ $cardUrl }}" class="{{ $iconAlignment }} mt-auto inline-flex items-center gap-1 pt-5 font-semibold text-brand-dark" @if (\App\Support\SafeUrl::isExternal($cardUrl)) target="_blank" rel="noopener noreferrer" @endif>{{ filled($card['link_label'] ?? null) ? $card['link_label'] : 'Read more' }} <span aria-hidden="true">&rarr;</span></a>
+                        @endif
                     @endif
                 </div>
             </article>

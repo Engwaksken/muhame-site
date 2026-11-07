@@ -88,6 +88,10 @@ class PagesAndContactTest extends TestCase
         $this->assertNotEmpty($header);
         $this->assertStringContainsString(url('/storage/brand/logo.png'), $header[0]);
         $this->assertStringContainsString('Get your eHub license', $header[0]);
+        preg_match('/data-top-header.*?data-main-menu/s', $header[0], $topHeader);
+        $this->assertNotEmpty($topHeader);
+        $this->assertStringContainsString(url('/storage/brand/logo.png'), $topHeader[0]);
+        $this->assertStringContainsString('Get your eHub license', $topHeader[0]);
     }
 
     public function test_navigation_shows_published_menu_pages_in_order(): void
