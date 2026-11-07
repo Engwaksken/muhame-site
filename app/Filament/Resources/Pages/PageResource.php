@@ -9,7 +9,7 @@ use App\Filament\Resources\Pages\Pages\ListPages;
 use App\Models\Page;
 use App\Support\FaIcon;
 use App\Support\SafeUrl;
-use BackedEnum;
+use Closure;
 use Filament\Actions\Action;
 use Filament\Actions\BulkActionGroup;
 use Filament\Actions\DeleteAction;
@@ -32,7 +32,7 @@ use Filament\Tables\Columns\IconColumn;
 use Filament\Tables\Columns\TextColumn;
 use Filament\Tables\Filters\SelectFilter;
 use Filament\Tables\Table;
-use Closure;
+use Illuminate\Contracts\Support\Htmlable;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Support\Str;
 use Illuminate\Validation\Rule;
@@ -43,7 +43,10 @@ class PageResource extends Resource
 
     protected static string|\UnitEnum|null $navigationGroup = 'Site';
 
-    public static function getNavigationIcon(): \Illuminate\Contracts\Support\Htmlable { return FaIcon::make('fa-file-lines'); }
+    public static function getNavigationIcon(): Htmlable
+    {
+        return FaIcon::make('fa-file-lines');
+    }
 
     protected static ?int $navigationSort = 1;
 
@@ -96,13 +99,13 @@ class PageResource extends Resource
                             ->helperText('Shown at the site root (/). Replaces the current homepage, if there is one.')->columnSpanFull(),
                         Section::make('Site menu')->columns(3)->columnSpanFull()->schema([
                             Toggle::make('show_in_navigation')->label('Show in site menu')->inline(false),
-                            Select::make('parent_id')->label('Appears under')->placeholder('Top level of the menu')
+                            Select::make('parent_id')->label('Menu group (parent page)')->placeholder('Top level of the menu')
                                 ->relationship('parent', 'title', fn (Builder $query, ?Page $record) => $query
                                     ->whereNull('parent_id')
                                     ->when($record, fn (Builder $q) => $q->whereKeyNot($record->getKey())))
-                                ->helperText('Pick a parent to show this page in its dropdown.'),
+                                ->helperText('Choose the main page title this page should sit under. Leave blank for a top-level tab.'),
                             TextInput::make('navigation_order')->label('Menu order')->numeric()->minValue(0)->maxValue(999)->default(0)
-                                ->helperText('Lower numbers appear first.'),
+                                ->helperText('Lower numbers appear first within the menu group.'),
                         ]),
                     ]),
 
@@ -121,8 +124,8 @@ class PageResource extends Resource
         return $table
             ->defaultSort('navigation_order')
             ->columns([
-                TextColumn::make('title')->searchable()->sortable()
-                    ->description(fn (Page $record) => $record->parent ? 'Under: '.$record->parent->title : null),
+                TextColumn::make('title')->searchable()->sortable(),
+                TextColumn::make('parent.title')->label('Menu group')->placeholder('Top level')->toggleable(),
                 TextColumn::make('slug')->label('Address')->prefix('/')->searchable(),
                 TextColumn::make('status')->badge()->sortable()
                     ->color(fn (string $state) => $state === 'published' ? 'success' : 'gray'),
@@ -134,6 +137,7 @@ class PageResource extends Resource
             ->modifyQueryUsing(fn (Builder $query) => $query->with('parent'))
             ->filters([
                 SelectFilter::make('status')->options(['draft' => 'Draft', 'published' => 'Published']),
+                SelectFilter::make('parent_id')->label('Menu group')->relationship('parent', 'title')->placeholder('All menu groups'),
             ])
             ->recordActions([
                 Action::make('open')->label('Open')->icon(FaIcon::make('fa-arrow-up-right-from-square'))

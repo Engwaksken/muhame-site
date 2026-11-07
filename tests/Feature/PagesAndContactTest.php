@@ -71,6 +71,25 @@ class PagesAndContactTest extends TestCase
             ->assertSee('target="_blank" rel="noopener noreferrer"', false);
     }
 
+    public function test_page_header_button_keeps_the_logo_in_the_main_header(): void
+    {
+        SiteSetting::current()->update(['logo_path' => 'brand/logo.png']);
+
+        Page::factory()->create([
+            'title' => 'Partners',
+            'slug' => 'partners',
+            'header_link_label' => 'Get your eHub license',
+            'header_link_url' => 'https://app.ehub.academy',
+        ]);
+
+        $response = $this->get('/partners')->assertOk();
+        preg_match('/<header\b.*?<\/header>/s', $response->getContent(), $header);
+
+        $this->assertNotEmpty($header);
+        $this->assertStringContainsString(url('/storage/brand/logo.png'), $header[0]);
+        $this->assertStringContainsString('Get your eHub license', $header[0]);
+    }
+
     public function test_navigation_shows_published_menu_pages_in_order(): void
     {
         Page::factory()->inNavigation(2)->create(['title' => 'Services', 'slug' => 'services']);
