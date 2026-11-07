@@ -63,3 +63,21 @@ h1, h2, h3, h4, h5, h6 {
 .rich-content pre { overflow-x: auto; border-radius: .75rem; background: #292524; padding: 1rem; color: #fafaf9; }
 .rich-content code { border-radius: .25rem; background: #f5f5f4; padding: .125rem .3rem; }
 .rich-content pre code { background: transparent; padding: 0; }
+
+.rich-content table {
+    width: 100%;
+    margin: 1.5rem auto;
+    border-collapse: collapse;
+}
+.rich-content th, .rich-content td {
+    padding: .875rem 1.25rem;
+    border: 1px solid #e7e5e4;
+    vertical-align: top;
+    text-align: start;
+}
+.rich-content th {
+    background: #f5f5f4;
+    font-weight: 700;
+}
+.rich-content td > :first-child, .rich-content th > :first-child { margin-top: 0; }
+.rich-content td > :last-child, .rich-content th > :last-child { margin-bottom: 0; }
