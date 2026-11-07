@@ -37,6 +37,10 @@ h1, h2, h3, h4, h5, h6 {
     font-family: var(--font-heading);
 }
 
+.team-member-name {
+    font-family: Georgia, Cambria, 'Times New Roman', serif;
+}
+
 @theme inline {
     --color-brand: var(--brand);
     --color-brand-fg: var(--brand-fg);

@@ -281,6 +281,47 @@ class SiteRedesignTest extends TestCase
         $this->get('/icon-cards')->assertOk()->assertSee('A card without a title');
     }
 
+    public function test_admin_can_add_a_team_section_and_render_its_members(): void
+    {
+        $this->seed();
+        $this->actingAs(User::factory()->create()->assignRole('Admin'));
+
+        Livewire::test(CreatePage::class)
+            ->fillForm([
+                'title' => 'Team profiles', 'slug' => 'team-profiles', 'status' => 'published',
+                'blocks' => [['type' => 'team', 'data' => ['columns' => '3', 'members' => [
+                    ['name' => 'Jane Example', 'role' => 'Executive Director', 'bio' => 'Leading our team.'],
+                    ['name' => 'Alex Example'],
+                ]]]],
+            ])
+            ->call('create')
+            ->assertHasNoFormErrors();
+
+        $page = Page::query()->where('slug', 'team-profiles')->firstOrFail();
+        $blocks = $page->blocks;
+        $blocks[0]['data']['members'][0]['image'] = 'team/jane.jpg';
+        $page->update(['blocks' => $blocks]);
+
+        $this->get('/team-profiles')->assertOk()
+            ->assertSee('Jane Example')->assertSee('Executive Director')
+            ->assertSee('Leading our team.')->assertSee('Alex Example')
+            ->assertSee('rounded-full', false)
+            ->assertSee('/storage/team/jane.jpg', false)
+            ->assertSee('team-member-name', false);
+    }
+
+    public function test_team_section_escapes_member_content(): void
+    {
+        $this->homepage([['type' => 'team', 'data' => ['members' => [
+            ['name' => '<script>alert(1)</script>', 'role' => '<b>Role</b>', 'bio' => '<img src=x onerror=alert(2)>'],
+        ]]]]);
+
+        $this->get('/')->assertOk()
+            ->assertDontSee('<script>alert(1)</script>', false)
+            ->assertDontSee('<b>Role</b>', false)
+            ->assertDontSee('<img src=x onerror=alert(2)>', false);
+    }
+
     public function test_text_section_can_be_saved_without_a_heading_or_content(): void
     {
         $this->seed();

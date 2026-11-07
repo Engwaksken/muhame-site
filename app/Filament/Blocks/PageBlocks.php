@@ -21,7 +21,7 @@ use Illuminate\Support\Str;
 class PageBlocks
 {
     /** Block types the public site knows how to render. */
-    public const TYPES = ['hero', 'text', 'image_text', 'cards', 'stats', 'methodology_showcase', 'learner_journey', 'latest_posts', 'upcoming_events', 'cta_banner', 'newsletter'];
+    public const TYPES = ['hero', 'text', 'image_text', 'cards', 'team', 'stats', 'methodology_showcase', 'learner_journey', 'latest_posts', 'upcoming_events', 'cta_banner', 'newsletter'];
 
     public static function builder(string $name = 'blocks'): Builder
     {
@@ -85,6 +85,19 @@ class PageBlocks
                         TextInput::make('link_label')->maxLength(40)->placeholder('Read more'),
                     ]),
                 ])->minItems(1)->maxItems(12)->defaultItems(3)->collapsible()->reorderableWithButtons()->itemLabel(fn (array $state) => $state['title'] ?? null),
+            ]),
+
+            Block::make('team')->label(self::label('Team'))->icon(FaIcon::make('fa-users'))->schema([
+                TextInput::make('heading')->maxLength(150),
+                Textarea::make('intro')->rows(2),
+                Select::make('columns')->options([2 => '2 per row', 3 => '3 per row', 4 => '4 per row'])->default(3),
+                Repeater::make('members')->label('Team members')->schema([
+                    self::image('image')->label('Portrait')->helperText('Optional. Displayed as a circular portrait; a square photo works best.'),
+                    TextInput::make('name')->maxLength(150),
+                    TextInput::make('role')->maxLength(200),
+                    Textarea::make('bio')->label('Biography')->rows(5),
+                ])->minItems(1)->maxItems(24)->defaultItems(3)->collapsible()->cloneable()->reorderableWithButtons()
+                    ->itemLabel(fn (array $state) => $state['name'] ?? null),
             ]),
 
             Block::make('stats')->label(self::label('Key statistics'))->icon(FaIcon::make('fa-chart-column'))->schema([
