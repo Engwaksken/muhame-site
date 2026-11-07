@@ -46,10 +46,12 @@
                 @endif
                 <span @class(['sr-only' => ! $siteSettings->headerShowsName(), 'truncate'])>{{ $siteSettings->site_name }}</span>
             </a>
-            <a href="{{ $pageHeaderLinkUrl ?: route('contact') }}" class="inline-flex shrink-0 items-center justify-center rounded-full bg-brand px-4 py-2.5 text-sm font-semibold text-brand-fg hover:bg-brand-dark sm:px-5"
-                @if ($pageHeaderLinkUrl && \App\Support\SafeUrl::isExternal($pageHeaderLinkUrl)) target="_blank" rel="noopener noreferrer" @endif>
-                {{ $pageHeaderLinkUrl ? $pageHeaderLinkLabel : 'Contact us' }}
-            </a>
+            @if ($pageHeaderLinkUrl)
+                <a href="{{ $pageHeaderLinkUrl }}" class="inline-flex shrink-0 items-center justify-center rounded-full bg-brand px-4 py-2.5 text-sm font-semibold text-brand-fg hover:bg-brand-dark sm:px-5"
+                    @if (\App\Support\SafeUrl::isExternal($pageHeaderLinkUrl)) target="_blank" rel="noopener noreferrer" @endif>
+                    {{ $pageHeaderLinkLabel }}
+                </a>
+            @endif
         </div>
 
         <div data-main-menu class="border-t border-stone-100">
@@ -98,6 +100,7 @@
                     <span class="sr-only">Search</span>
                     <svg class="size-5" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" aria-hidden="true"><path stroke-linecap="round" stroke-linejoin="round" d="m21 21-4.35-4.35M17 10.5a6.5 6.5 0 1 1-13 0 6.5 6.5 0 0 1 13 0Z"/></svg>
                 </button>
+                <a href="{{ route('contact') }}" class="inline-flex shrink-0 items-center justify-center rounded-full bg-brand px-5 py-2.5 text-sm font-semibold text-brand-fg hover:bg-brand-dark">Contact us</a>
                 <button type="button" class="rounded-full p-2.5 text-stone-800 hover:bg-stone-100 lg:hidden" aria-expanded="false" aria-controls="mobile-menu" data-toggle="mobile-menu">
                     <span class="sr-only">Menu</span>
                     <svg class="size-6" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" aria-hidden="true"><path stroke-linecap="round" d="M4 7h16M4 12h16M4 17h16"/></svg>
@@ -133,13 +136,6 @@
                         @endif
                     </li>
                 @endforeach
-                @if ($pageHeaderLinkUrl)
-                    <li class="pt-3"><a href="{{ $pageHeaderLinkUrl }}" class="block rounded-full bg-brand px-5 py-3 text-center font-semibold text-brand-fg hover:bg-brand-dark"
-                        @if (\App\Support\SafeUrl::isExternal($pageHeaderLinkUrl)) target="_blank" rel="noopener noreferrer" @endif>{{ $pageHeaderLinkLabel }}</a></li>
-                    <li><a href="{{ route('contact') }}" class="block rounded-full border-2 border-brand px-5 py-3 text-center font-semibold text-brand-dark hover:bg-brand-soft">Contact us</a></li>
-                @else
-                    <li class="pt-3"><a href="{{ route('contact') }}" class="block rounded-full bg-brand px-5 py-3 text-center font-semibold text-brand-fg hover:bg-brand-dark">Contact us</a></li>
-                @endif
             </ul>
         </nav>
     </header>
