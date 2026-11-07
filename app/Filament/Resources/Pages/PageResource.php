@@ -62,7 +62,7 @@ class PageResource extends Resource
                         Textarea::make('excerpt')->label('Introduction')->rows(3)->maxLength(300)
                             ->helperText('Shown under the title at the top of the page, and in menu dropdowns.'),
                         TextInput::make('header_link_label')->label('Top header button text')->maxLength(60)->requiredWith('header_link_url')
-                            ->helperText('Optional page-specific button shown in the top header.'),
+                            ->helperText('Shown in the top header. Set this on the published homepage for a site-wide default; other pages can override it.'),
                         TextInput::make('header_link_url')->label('Top header button URL')->maxLength(255)->requiredWith('header_link_label')
                             ->placeholder('https://example.com')
                             ->rules([fn () => function (string $attribute, mixed $value, Closure $fail): void {

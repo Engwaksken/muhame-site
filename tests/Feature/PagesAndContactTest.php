@@ -98,6 +98,37 @@ class PagesAndContactTest extends TestCase
         $this->assertStringNotContainsString('Get your eHub license', $mainHeader);
     }
 
+    public function test_homepage_header_button_is_used_across_the_site_and_can_be_overridden(): void
+    {
+        Page::factory()->create([
+            'is_homepage' => true,
+            'header_link_label' => 'Open learning platform',
+            'header_link_url' => 'https://app.ehub.academy',
+        ]);
+        Page::factory()->create(['slug' => 'about-header']);
+        Page::factory()->create([
+            'slug' => 'partner-header',
+            'header_link_label' => 'Partner portal',
+            'header_link_url' => 'https://example.com/partners',
+        ]);
+
+        $this->get('/contact')->assertOk()->assertSee('Open learning platform');
+        $this->get('/about-header')->assertOk()->assertSee('Open learning platform');
+        $this->get('/insights')->assertOk()->assertSee('Open learning platform');
+        $this->get('/partner-header')->assertOk()->assertSee('Partner portal')->assertDontSee('Open learning platform');
+    }
+
+    public function test_draft_homepage_header_button_is_not_displayed(): void
+    {
+        Page::factory()->draft()->create([
+            'is_homepage' => true,
+            'header_link_label' => 'Unpublished button',
+            'header_link_url' => 'https://example.com',
+        ]);
+
+        $this->get('/contact')->assertOk()->assertDontSee('Unpublished button');
+    }
+
     public function test_navigation_shows_published_menu_pages_in_order(): void
     {
         Page::factory()->inNavigation(2)->create(['title' => 'Services', 'slug' => 'services']);

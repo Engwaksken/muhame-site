@@ -10,6 +10,16 @@
         : null;
     $pageHeaderLinkLabel = $pageHeaderLinkUrl && isset($page) ? trim((string) $page->header_link_label) : '';
     if ($pageHeaderLinkLabel === '') $pageHeaderLinkUrl = null;
+    // Use the published homepage's button across the site unless this page overrides it.
+    if (! $pageHeaderLinkUrl) {
+        $headerHome = \App\Models\Page::homepage();
+        $homeLinkUrl = \App\Support\SafeUrl::clean($headerHome?->header_link_url, allowRelative: false);
+        $homeLinkLabel = trim((string) $headerHome?->header_link_label);
+        if ($homeLinkUrl && $homeLinkLabel !== '') {
+            $pageHeaderLinkUrl = $homeLinkUrl;
+            $pageHeaderLinkLabel = $homeLinkLabel;
+        }
+    }
 @endphp
 <!DOCTYPE html>
 <html lang="{{ str_replace('_', '-', app()->getLocale()) }}" style="--brand: {{ $brand }}; --brand-fg: {{ $siteSettings->primaryTextColor() }}; --ink: {{ $ink }}; --ink-fg: #ffffff; --font-body: {{ \App\Models\SiteSetting::fontStack($siteSettings->bodyFontKey()) }}; --font-heading: {{ \App\Models\SiteSetting::fontStack($siteSettings->headingFontKey()) }}; font-size: {{ $siteSettings->baseFontSize() }};">
