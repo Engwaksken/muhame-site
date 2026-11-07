@@ -8,7 +8,7 @@
 
 @section('content')
     <header class="bg-brand-soft">
-        <div class="mx-auto max-w-7xl px-5 py-14 sm:px-8 sm:py-20">
+        <div class="mx-auto max-w-7xl px-5 py-10 sm:px-8 sm:py-14">
             <h1 class="text-4xl font-bold tracking-tight text-stone-950 sm:text-5xl">{{ $heading }}</h1>
             @if ($description)
                 <p class="mt-4 max-w-2xl text-lg leading-8 text-stone-700">{{ $description }}</p>
@@ -40,7 +40,7 @@
         </div>
     </header>
 
-    <div class="mx-auto max-w-7xl px-5 py-12 sm:px-8 sm:py-16">
+    <div class="mx-auto max-w-7xl px-5 py-10 sm:px-8 sm:py-14">
         @if ($posts->isEmpty())
             <div class="rounded-2xl border border-dashed border-stone-300 bg-white px-6 py-16 text-center">
                 <h2 class="text-xl font-semibold">{{ isset($searchQuery) ? 'No results found' : 'Nothing published yet' }}</h2>

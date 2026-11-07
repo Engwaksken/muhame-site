@@ -320,7 +320,7 @@ class SiteSetting extends Model
 
         return collect($selected)->filter(fn ($key) => is_string($key) && isset($available[$key]))
             ->mapWithKeys(fn (string $key) => [match ($key) {
-                'insights' => 'Insights',
+                'insights' => 'Blogs',
                 'events' => 'Events',
                 'contact' => 'Contact',
             } => $available[$key]])

@@ -17,7 +17,7 @@
 @section('content')
     @unless ($startsWithHero)
         <header class="bg-brand-soft">
-            <div @class(['mx-auto grid max-w-7xl items-center gap-10 px-5 py-14 sm:px-8 sm:py-20', 'lg:grid-cols-2' => $heroImage])>
+            <div @class(['mx-auto grid max-w-7xl items-center gap-8 px-5 py-10 sm:px-8 sm:py-14', 'lg:grid-cols-2' => $heroImage])>
                 <div>
                     @if ($page->parent)
                         <nav aria-label="Breadcrumb" class="mb-4 text-sm font-semibold">
@@ -40,7 +40,7 @@
         @include($block['view'], ['data' => $block['data'], 'blockIndex' => $loop->index])
     @empty
         @if ($safeBody !== '')
-            <div class="mx-auto max-w-3xl px-5 py-14 sm:px-8 sm:py-20">
+            <div class="mx-auto max-w-3xl px-5 py-10 sm:px-8 sm:py-14">
                 <div class="rich-content text-lg leading-8 text-stone-700">{!! $safeBody !!}</div>
             </div>
         @endif

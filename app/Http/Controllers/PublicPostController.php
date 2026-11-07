@@ -23,10 +23,10 @@ class PublicPostController extends Controller
         $isHomepage = request()->routeIs('home');
 
         return view('public.posts.index', [
-            'heading' => $isHomepage ? $settings->homepage_title : 'Insights',
+            'heading' => $isHomepage ? $settings->homepage_title : 'Blogs',
             'description' => $isHomepage
                 ? $settings->homepage_description
-                : 'Research, news and stories from our team.',
+                : 'News, posts and stories from our team.',
             'posts' => $this->publishedPosts()->paginate(12),
         ]);
     }

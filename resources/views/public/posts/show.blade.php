@@ -15,7 +15,7 @@
 
 @section('content')
     <header class="bg-brand-soft">
-        <div class="mx-auto max-w-4xl px-5 py-14 sm:px-8 sm:py-20">
+        <div class="mx-auto max-w-4xl px-5 py-10 sm:px-8 sm:py-14">
             <nav aria-label="Breadcrumb" class="flex flex-wrap items-center gap-2 text-sm font-semibold">
                 <a href="{{ route('posts.index') }}" class="text-brand-dark">Insights</a>
                 @if ($post->category)

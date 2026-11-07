@@ -1,5 +1,5 @@
-<section class="bg-[#002d22] px-5 py-8 text-white sm:px-8 sm:py-10">
-    <div class="mx-auto max-w-6xl border border-white/20 px-5 py-6 sm:px-8 sm:py-8">
+<section class="bg-[#002d22] px-5 py-6 text-white sm:px-8 sm:py-8">
+    <div class="mx-auto max-w-6xl border border-white/20 px-5 py-5 sm:px-8 sm:py-6">
         <h2 class="text-xs font-bold uppercase tracking-[0.18em] text-[#f4a340]">{{ $data['heading'] ?? 'THE LEARNER JOURNEY' }}</h2>
         @php($steps = array_values($data['steps'] ?? []))
         @php($stepColumns = [2 => 'lg:grid-cols-2', 3 => 'lg:grid-cols-3', 4 => 'lg:grid-cols-4', 5 => 'lg:grid-cols-5', 6 => 'lg:grid-cols-6'][min(count($steps), 6)] ?? 'lg:grid-cols-6')

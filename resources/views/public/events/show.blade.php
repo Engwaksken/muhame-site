@@ -14,7 +14,7 @@
 
 @section('content')
     <header class="bg-brand-soft">
-        <div class="mx-auto max-w-5xl px-5 py-14 sm:px-8 sm:py-20">
+        <div class="mx-auto max-w-5xl px-5 py-10 sm:px-8 sm:py-14">
             <nav aria-label="Breadcrumb" class="text-sm font-semibold">
                 <a href="{{ route('events.index') }}" class="text-brand-dark">Events</a>
             </nav>

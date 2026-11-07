@@ -40,10 +40,10 @@
     <header class="sticky top-0 z-40 border-b border-stone-200 bg-white/95 backdrop-blur">
         @if ($pageHeaderLinkUrl)
             <div class="border-b border-stone-200 bg-white">
-                <div class="mx-auto flex min-h-16 max-w-7xl items-center justify-between gap-4 px-5 py-2 sm:px-8">
+                <div class="mx-auto flex min-h-20 max-w-7xl items-center justify-between gap-4 px-5 py-2 sm:px-8">
                     <a href="{{ route('home') }}" class="flex min-w-0 items-center gap-3 text-xl font-bold tracking-tight text-stone-950">
                         @if ($logoUrl && $siteSettings->headerShowsLogo())
-                            <img src="{{ $logoUrl }}" alt="" class="max-h-11 max-w-44 object-contain">
+                            <img src="{{ $logoUrl }}" alt="" class="h-12 w-auto max-w-56 object-contain sm:h-14">
                         @endif
                         <span @class(['sr-only' => ! $siteSettings->headerShowsName(), 'truncate'])>{{ $siteSettings->site_name }}</span>
                     </a>
@@ -54,11 +54,11 @@
                 </div>
             </div>
         @endif
-        <div class="mx-auto flex h-18 max-w-7xl items-center gap-6 px-5 sm:px-8">
+        <div class="mx-auto flex h-20 max-w-7xl items-center gap-6 px-5 sm:px-8">
             @unless ($pageHeaderLinkUrl)
                 <a href="{{ route('home') }}" class="flex min-w-0 shrink-0 items-center gap-3 text-xl font-bold tracking-tight text-stone-950">
                     @if ($logoUrl && $siteSettings->headerShowsLogo())
-                        <img src="{{ $logoUrl }}" alt="" class="max-h-11 max-w-44 object-contain">
+                        <img src="{{ $logoUrl }}" alt="" class="h-12 w-auto max-w-56 object-contain sm:h-14">
                     @endif
                     <span @class(['sr-only' => ! $siteSettings->headerShowsName(), 'truncate'])>{{ $siteSettings->site_name }}</span>
                 </a>
@@ -75,7 +75,7 @@
                                     {{ $navPage->title }}
                                     <svg class="size-4 transition group-hover:rotate-180" viewBox="0 0 20 20" fill="currentColor" aria-hidden="true"><path fill-rule="evenodd" d="M5.23 7.21a.75.75 0 0 1 1.06.02L10 11.17l3.71-3.94a.75.75 0 1 1 1.08 1.04l-4.25 4.5a.75.75 0 0 1-1.08 0l-4.25-4.5a.75.75 0 0 1 .02-1.06Z" clip-rule="evenodd"/></svg>
                                 </button>
-                                <div id="menu-{{ $navPage->id }}" class="absolute left-1/2 top-full hidden w-[34rem] -translate-x-1/2 pt-3 group-hover:block group-focus-within:block">
+                                <div id="menu-{{ $navPage->id }}" @class(['absolute left-1/2 top-full hidden -translate-x-1/2 pt-3 group-hover:block group-focus-within:block', 'w-[27rem]' => $navPage->children->count() <= 1, 'w-[34rem]' => $navPage->children->count() > 1])>
                                     <div class="grid grid-cols-5 overflow-hidden rounded-2xl border border-stone-200 bg-white shadow-xl">
                                         <div class="col-span-2 bg-brand-soft p-6">
                                             <a href="{{ $navPage->url() }}" class="text-lg font-bold text-stone-950 hover:text-brand-dark">{{ $navPage->title }}</a>
@@ -118,15 +118,15 @@
         {{-- Search panel --}}
         <div id="site-search-panel" class="hidden border-t border-stone-200 bg-stone-50" data-focus="input">
             <form action="{{ route('search') }}" method="GET" role="search" class="mx-auto flex max-w-3xl gap-3 px-5 py-5 sm:px-8">
-                <label for="site-search" class="sr-only">Search insights</label>
-                <input id="site-search" type="search" name="q" value="{{ request('q') }}" maxlength="100" placeholder="Search insights…" required
+                <label for="site-search" class="sr-only">Search the blog</label>
+                <input id="site-search" type="search" name="q" value="{{ request('q') }}" maxlength="100" placeholder="Search the blog…" required
                     class="min-w-0 flex-1 rounded-full border border-stone-300 bg-white px-5 py-3 focus:border-brand focus:outline-none">
                 <button class="rounded-full bg-ink px-6 py-3 font-semibold text-white hover:opacity-90">Search</button>
             </form>
         </div>
 
         {{-- Mobile menu --}}
-        <nav id="mobile-menu" aria-label="Main" class="hidden max-h-[calc(100vh-4.5rem)] overflow-y-auto border-t border-stone-200 bg-white lg:hidden">
+        <nav id="mobile-menu" aria-label="Main" class="hidden max-h-[calc(100vh-5rem)] overflow-y-auto border-t border-stone-200 bg-white lg:hidden">
             <ul class="space-y-1 px-5 py-4">
                 @foreach ($navigationPages as $navPage)
                     <li>
@@ -154,7 +154,7 @@
 
     {{-- Footer --}}
     <footer class="bg-ink text-white">
-        <div class="mx-auto grid max-w-7xl gap-12 px-5 py-16 sm:px-8 lg:grid-cols-12">
+        <div class="mx-auto grid max-w-7xl gap-10 px-5 py-12 sm:px-8 sm:py-14 lg:grid-cols-12">
             <div class="lg:col-span-4">
                 <a href="{{ route('home') }}" class="text-2xl font-bold tracking-tight">{{ $siteSettings->site_name }}</a>
                 @if ($siteSettings->tagline)

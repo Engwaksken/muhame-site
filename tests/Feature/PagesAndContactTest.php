@@ -311,13 +311,13 @@ class PagesAndContactTest extends TestCase
             ->assertHasFormErrors(['slug']);
 
         Livewire::test(CreatePage::class)
-            ->fillForm(['title' => 'About us', 'slug' => 'about-us', 'body' => '<p>Hello</p>', 'status' => 'published'])
+            ->fillForm(['title' => 'A new page', 'slug' => 'a-new-page', 'body' => '<p>Hello</p>', 'status' => 'published'])
             ->call('create')
             ->assertHasNoFormErrors();
 
         $this->assertDatabaseMissing('pages', ['slug' => 'admin']);
-        $this->assertDatabaseHas('pages', ['slug' => 'about-us', 'status' => 'published']);
-        $this->get('/about-us')->assertOk()->assertSee('Hello');
+        $this->assertDatabaseHas('pages', ['slug' => 'a-new-page', 'status' => 'published']);
+        $this->get('/a-new-page')->assertOk()->assertSee('Hello');
     }
 
     public function test_admin_can_mark_a_message_as_read(): void

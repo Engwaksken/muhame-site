@@ -361,6 +361,35 @@ class SiteRedesignTest extends TestCase
         $this->assertSame(Width::TwoExtraLarge, EditAction::make()->getModalWidth());
     }
 
+    public function test_starter_seed_groups_the_menu_into_four_tabs(): void
+    {
+        $this->seed();
+
+        $topLevel = Page::query()->inNavigation()->get();
+
+        $this->assertSame(['About us', 'Solution', 'Methodology'], $topLevel->pluck('title')->all());
+        $this->assertSame(['Who we are', 'Problem & Gap', 'Meet our team'], $topLevel[0]->children->pluck('title')->all());
+        $this->assertSame(['eHub as a solution', 'Why it works', 'Field'], $topLevel[1]->children->pluck('title')->all());
+        $this->assertSame(['References'], $topLevel[2]->children->pluck('title')->all());
+        $this->assertSame('/insights', SiteSetting::current()->navigation_links['Blogs'] ?? null);
+    }
+
+    public function test_team_page_lists_the_leadership_team_and_both_board_members(): void
+    {
+        $this->seed();
+
+        $team = Page::query()->where('slug', 'our-team')->firstOrFail();
+        $blocks = collect($team->blocks);
+
+        $this->assertTrue($blocks->contains(fn (array $block) => ($block['data']['heading'] ?? null) === 'Leadership team'));
+        $this->assertTrue($blocks->contains(fn (array $block) => ($block['data']['heading'] ?? null) === 'Board of directors'));
+
+        $boardBlock = $blocks->first(fn (array $block) => ($block['data']['heading'] ?? null) === 'Board of directors');
+        $boardTitles = $boardBlock['data']['cards'] ?? [];
+
+        $this->assertSame(['Mr. Andrea', 'Dr. Mugenyi'], collect($boardTitles)->pluck('title')->all());
+    }
+
     public function test_starter_homepage_is_seeded_as_a_draft_once(): void
     {
         $this->seed();
@@ -368,7 +397,7 @@ class SiteRedesignTest extends TestCase
 
         $this->assertSame(1, Page::query()->where('is_homepage', true)->count());
         $this->assertSame('draft', Page::query()->where('is_homepage', true)->value('status'));
-        $this->assertSame(6, Page::query()->count());
+        $this->assertSame(11, Page::query()->count());
     }
 
     public function test_imported_pages_can_be_edited_and_published(): void
