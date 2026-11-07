@@ -70,9 +70,16 @@ class PageBlocks
                     ->helperText('Images fill the selected shape and are cropped to fit.'),
                 Select::make('columns')->options([2 => '2 per row', 3 => '3 per row', 4 => '4 per row'])->default(3)->required(),
                 Repeater::make('cards')->schema([
-                    self::image('image'),
+                    self::image('image')->helperText('Optional. When an image is uploaded, it is shown instead of the icon.'),
+                    TextInput::make('icon')->label('Icon (optional)')->maxLength(80)
+                        ->placeholder('fa-graduation-cap')->regex('/^fa-[a-z0-9]+(?:-[a-z0-9]+)*$/')
+                        ->helperText('Font Awesome solid icon name, e.g. fa-users, fa-leaf or fa-graduation-cap.'),
+                    Select::make('alignment')->label('Content alignment')
+                        ->options(['left' => 'Left', 'center' => 'Center', 'right' => 'Right'])->default('left'),
                     TextInput::make('title')->required()->maxLength(120),
                     Textarea::make('text')->rows(2)->maxLength(250),
+                    Textarea::make('source')->label('Source text (optional)')->rows(2)->maxLength(300)
+                        ->helperText('A citation or credit displayed beneath the card text.'),
                     Grid::make(2)->schema([
                         self::url('url')->label('Link'),
                         TextInput::make('link_label')->maxLength(40)->placeholder('Read more'),

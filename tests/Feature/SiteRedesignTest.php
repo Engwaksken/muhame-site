@@ -239,6 +239,47 @@ class SiteRedesignTest extends TestCase
         $this->get('/services')->assertOk()->assertSee('Talk to us');
     }
 
+    public function test_cards_render_icons_alignment_and_optional_sources_safely(): void
+    {
+        $this->homepage([['type' => 'cards', 'data' => ['cards' => [
+            ['title' => 'Learning', 'icon' => 'fa-graduation-cap', 'alignment' => 'center', 'source' => 'Source: Field research'],
+            ['title' => 'Photo', 'image' => 'blocks/photo.jpg', 'icon' => 'fa-leaf', 'alignment' => 'right'],
+            ['title' => 'Unsafe', 'icon' => 'fa-users onclick=alert(1)', 'source' => '<script>alert(1)</script>'],
+        ]]]]);
+
+        $this->get('/')->assertOk()
+            ->assertSee('fas fa-graduation-cap self-center', false)
+            ->assertSee('text-center', false)
+            ->assertSee('text-right', false)
+            ->assertSee('Source: Field research')
+            ->assertSee('/storage/blocks/photo.jpg', false)
+            ->assertDontSee('fas fa-leaf', false)
+            ->assertDontSee('onclick=alert', false)
+            ->assertDontSee('<script>alert(1)</script>', false);
+    }
+
+    public function test_admin_can_save_card_icons_alignment_and_sources(): void
+    {
+        $this->seed();
+        $this->actingAs(User::factory()->create()->assignRole('Admin'));
+
+        Livewire::test(CreatePage::class)
+            ->fillForm([
+                'title' => 'Icon cards', 'slug' => 'icon-cards', 'status' => 'published',
+                'blocks' => [['type' => 'cards', 'data' => ['columns' => '2', 'cards' => [
+                    ['title' => 'Research', 'icon' => 'fa-leaf', 'alignment' => 'center', 'source' => 'Field notes'],
+                    ['title' => 'No source', 'alignment' => 'left'],
+                ]]]],
+            ])
+            ->call('create')
+            ->assertHasNoFormErrors();
+
+        $page = Page::query()->where('slug', 'icon-cards')->firstOrFail();
+        $this->assertSame('fa-leaf', $page->blocks[0]['data']['cards'][0]['icon']);
+        $this->assertSame('center', $page->blocks[0]['data']['cards'][0]['alignment']);
+        $this->assertSame('Field notes', $page->blocks[0]['data']['cards'][0]['source']);
+    }
+
     public function test_text_section_can_be_saved_without_a_heading_or_content(): void
     {
         $this->seed();
