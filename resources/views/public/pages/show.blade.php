@@ -17,7 +17,7 @@
 @section('content')
     @unless ($startsWithHero)
         <header class="bg-brand-soft">
-            <div @class(['mx-auto grid min-h-48 max-w-7xl items-center gap-6 px-5 py-8 sm:min-h-64 sm:px-8 sm:py-10', 'lg:grid-cols-2' => $heroImage])>
+            <div @class(['mx-auto grid min-h-64 max-w-7xl items-center gap-8 px-5 py-10 sm:min-h-80 sm:px-8 sm:py-12', 'lg:grid-cols-2' => $heroImage])>
                 <div>
                     @if ($page->parent)
                         <nav aria-label="Breadcrumb" class="mb-2 text-sm font-semibold">
@@ -30,7 +30,7 @@
                     @endif
                 </div>
                 @if ($heroImage)
-                    <img src="{{ $heroImage }}" alt="" class="h-48 w-full rounded-2xl object-cover sm:h-56">
+                    <img src="{{ $heroImage }}" alt="" class="h-56 w-full rounded-2xl object-cover sm:h-72">
                 @endif
             </div>
         </header>
