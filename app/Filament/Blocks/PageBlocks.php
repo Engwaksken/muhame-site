@@ -64,7 +64,7 @@ class PageBlocks
 
             Block::make('cards')->label(self::label('Card row'))->icon(FaIcon::make('fa-table-cells-large'))->schema([
                 TextInput::make('heading')->maxLength(150),
-                Textarea::make('intro')->rows(2)->maxLength(300),
+                Textarea::make('intro')->rows(2),
                 Select::make('layout')->options(['cards' => 'Cards', 'numbered' => 'Numbered list', 'minimal' => 'Minimal columns'])->default('cards'),
                 Select::make('image_ratio')->label('Image crop')->options(['landscape' => 'Landscape (16:10)', 'square' => 'Square (1:1)', 'portrait' => 'Portrait (4:5)'])->default('landscape')
                     ->helperText('Images fill the selected shape and are cropped to fit.'),
@@ -77,7 +77,7 @@ class PageBlocks
                     Select::make('alignment')->label('Content alignment')
                         ->options(['left' => 'Left', 'center' => 'Center', 'right' => 'Right'])->default('left'),
                     TextInput::make('title')->required()->maxLength(120),
-                    Textarea::make('text')->rows(2)->maxLength(250),
+                    Textarea::make('text')->rows(2),
                     Textarea::make('source')->label('Source text (optional)')->rows(2)->maxLength(300)
                         ->helperText('A citation or credit displayed beneath the card text.'),
                     Grid::make(2)->schema([
