@@ -145,6 +145,19 @@ class SiteSettingResource extends Resource
                     ]),
 
                     Tab::make('Main menu')->icon(FaIcon::make('fa-bars'))->schema([
+                        Section::make('Top header button')->columns(2)
+                            ->description('Site-wide button displayed to the right of the logo, above the main menu. Contact us remains in the main menu.')
+                            ->schema([
+                                TextInput::make('top_header_button_label')->label('Button text')->maxLength(60)
+                                    ->requiredWith('top_header_button_url'),
+                                TextInput::make('top_header_button_url')->label('Button URL')->maxLength(255)
+                                    ->placeholder('https://app.ehub.academy')->requiredWith('top_header_button_label')
+                                    ->rules([fn () => function (string $attribute, mixed $value, Closure $fail): void {
+                                        if (filled($value) && SafeUrl::clean($value, allowRelative: false) === null) {
+                                            $fail('Enter a full https://, http://, or mailto: URL.');
+                                        }
+                                    }]),
+                            ]),
                         Repeater::make('main_menu')->label('Main menu items')
                             ->schema(self::menuItemFields(withChildren: true))
                             ->columns(2)->collapsible()->cloneable()

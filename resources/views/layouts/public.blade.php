@@ -10,6 +10,13 @@
         : null;
     $pageHeaderLinkLabel = $pageHeaderLinkUrl && isset($page) ? trim((string) $page->header_link_label) : '';
     if ($pageHeaderLinkLabel === '') $pageHeaderLinkUrl = null;
+    // A site-wide setting takes precedence over legacy per-page buttons.
+    $globalHeaderUrl = \App\Support\SafeUrl::clean($siteSettings->top_header_button_url, allowRelative: false);
+    $globalHeaderLabel = trim((string) $siteSettings->top_header_button_label);
+    if ($globalHeaderUrl && $globalHeaderLabel !== '') {
+        $pageHeaderLinkUrl = $globalHeaderUrl;
+        $pageHeaderLinkLabel = $globalHeaderLabel;
+    }
     // Use the published homepage's button across the site unless this page overrides it.
     if (! $pageHeaderLinkUrl) {
         $headerHome = \App\Models\Page::homepage();

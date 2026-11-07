@@ -15,6 +15,7 @@ use Illuminate\Support\Collection;
     'newsletter_heading', 'newsletter_text', 'favicon_path', 'body_font', 'heading_font', 'base_font_size',
     'contact_phone', 'contact_address', 'office_hours', 'map_location', 'map_embed_url',
     'header_display', 'primary_text_color',
+    'top_header_button_label', 'top_header_button_url',
 ])]
 class SiteSetting extends Model
 {

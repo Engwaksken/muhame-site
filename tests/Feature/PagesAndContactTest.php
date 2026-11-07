@@ -129,6 +129,46 @@ class PagesAndContactTest extends TestCase
         $this->get('/contact')->assertOk()->assertDontSee('Unpublished button');
     }
 
+    public function test_admin_can_save_a_site_wide_top_header_button(): void
+    {
+        $this->seed();
+        $this->actingAs(User::factory()->create()->assignRole('Admin'));
+
+        Livewire::test(ManageSiteSettings::class)
+            ->fillForm([
+                'top_header_button_label' => 'Get your eHub license',
+                'top_header_button_url' => 'https://app.ehub.academy',
+            ])
+            ->call('save')->assertHasNoFormErrors();
+
+        $this->assertDatabaseHas('site_settings', [
+            'top_header_button_label' => 'Get your eHub license',
+            'top_header_button_url' => 'https://app.ehub.academy',
+        ]);
+        SiteSetting::current()->refresh();
+        $this->get('/contact')->assertOk()->assertSee('Get your eHub license');
+        $this->get('/insights')->assertOk()->assertSee('Get your eHub license');
+    }
+
+    public function test_global_button_does_not_require_a_homepage_and_rejects_unsafe_links(): void
+    {
+        $settings = SiteSetting::current();
+        $settings->update([
+            'top_header_button_label' => 'Global portal',
+            'top_header_button_url' => 'https://example.com/portal',
+        ]);
+        Page::factory()->create([
+            'slug' => 'header-override',
+            'header_link_label' => 'Legacy portal',
+            'header_link_url' => 'https://example.com/legacy',
+        ]);
+
+        $this->get('/')->assertOk()->assertSee('Global portal');
+        $this->get('/header-override')->assertOk()->assertSee('Global portal')->assertDontSee('Legacy portal');
+        $settings->update(['top_header_button_url' => 'javascript:alert(1)']);
+        $this->get('/contact')->assertOk()->assertDontSee('Global portal')->assertDontSee('javascript:', false);
+    }
+
     public function test_navigation_shows_published_menu_pages_in_order(): void
     {
         Page::factory()->inNavigation(2)->create(['title' => 'Services', 'slug' => 'services']);
