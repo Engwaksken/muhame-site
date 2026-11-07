@@ -6,10 +6,10 @@
 
 @section('content')
     <header class="bg-brand-soft">
-        <div class="mx-auto max-w-7xl px-5 py-10 sm:px-8 sm:py-14">
+        <div class="mx-auto max-w-7xl px-5 py-6 sm:px-8 sm:py-8">
             <h1 class="text-4xl font-bold tracking-tight text-stone-950 sm:text-5xl">Events</h1>
-            <p class="mt-4 max-w-2xl text-lg leading-8 text-stone-700">Workshops, talks and gatherings, in person and online.</p>
-            <nav aria-label="Event filter" class="mt-8">
+            <p class="mt-3 max-w-2xl text-lg leading-8 text-stone-700">Workshops, talks and gatherings, in person and online.</p>
+            <nav aria-label="Event filter" class="mt-6">
                 <ul class="flex flex-wrap gap-2">
                     @foreach ([false => ['Upcoming', route('events.index')], true => ['Past events', route('events.index', ['when' => 'past'])]] as $isPast => [$label, $url])
                         <li>
@@ -25,7 +25,7 @@
         </div>
     </header>
 
-    <div class="mx-auto max-w-7xl px-5 py-10 sm:px-8 sm:py-14">
+    <div class="mx-auto max-w-7xl px-5 py-6 sm:px-8 sm:py-8">
         @if ($events->isEmpty())
             <div class="rounded-2xl border border-dashed border-stone-300 bg-white px-6 py-16 text-center">
                 <h2 class="text-xl font-semibold">{{ $showPast ? 'No past events yet' : 'No upcoming events right now' }}</h2>

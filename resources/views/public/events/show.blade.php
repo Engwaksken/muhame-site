@@ -14,7 +14,7 @@
 
 @section('content')
     <header class="bg-brand-soft">
-        <div class="mx-auto max-w-5xl px-5 py-10 sm:px-8 sm:py-14">
+        <div class="mx-auto max-w-5xl px-5 py-6 sm:px-8 sm:py-8">
             <nav aria-label="Breadcrumb" class="text-sm font-semibold">
                 <a href="{{ route('events.index') }}" class="text-brand-dark">Events</a>
             </nav>
@@ -28,7 +28,7 @@
         </div>
     </header>
 
-    <div class="mx-auto grid max-w-5xl gap-12 px-5 py-12 sm:px-8 sm:py-16 lg:grid-cols-3">
+    <div class="mx-auto grid max-w-5xl gap-8 px-5 py-6 sm:px-8 sm:py-8 lg:grid-cols-3">
         <div class="lg:col-span-2">
             @if ($eventImage)
                 <img src="{{ $eventImage }}" alt="" class="mb-10 w-full rounded-3xl object-cover">

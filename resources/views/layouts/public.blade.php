@@ -150,7 +150,7 @@
 
     {{-- Footer --}}
     <footer class="bg-ink text-white">
-        <div class="mx-auto grid max-w-7xl gap-10 px-5 py-12 sm:px-8 sm:py-14 lg:grid-cols-12">
+        <div class="mx-auto grid max-w-7xl gap-8 px-5 py-8 sm:px-8 sm:py-10 lg:grid-cols-12">
             <div class="lg:col-span-4">
                 <a href="{{ route('home') }}" class="text-2xl font-bold tracking-tight">{{ $siteSettings->site_name }}</a>
                 @if ($siteSettings->tagline)
@@ -165,7 +165,7 @@
             </div>
 
             @if ($footerColumns)
-                <div class="grid gap-10 sm:grid-cols-2 lg:col-span-4">
+                <div class="grid gap-8 sm:grid-cols-2 lg:col-span-4">
                     @foreach ($footerColumns as $column)
                         <div>
                             @if (filled($column['title']))
@@ -181,7 +181,7 @@
                     @endforeach
                 </div>
             @else
-                <div class="grid gap-10 sm:grid-cols-2 lg:col-span-4">
+                <div class="grid gap-8 sm:grid-cols-2 lg:col-span-4">
                     <div>
                         <h2 class="text-sm font-semibold uppercase tracking-[0.16em] opacity-70">Explore</h2>
                         <ul class="mt-4 space-y-2.5">

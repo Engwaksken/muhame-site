@@ -15,7 +15,7 @@
 
 @section('content')
     <header class="bg-brand-soft">
-        <div class="mx-auto max-w-4xl px-5 py-10 sm:px-8 sm:py-14">
+        <div class="mx-auto max-w-4xl px-5 py-6 sm:px-8 sm:py-8">
             <nav aria-label="Breadcrumb" class="flex flex-wrap items-center gap-2 text-sm font-semibold">
                 <a href="{{ route('posts.index') }}" class="text-brand-dark">Insights</a>
                 @if ($post->category)
@@ -32,7 +32,7 @@
         </div>
     </header>
 
-    <article class="mx-auto max-w-4xl px-5 py-12 sm:px-8 sm:py-16">
+    <article class="mx-auto max-w-4xl px-5 py-6 sm:px-8 sm:py-8">
         @if ($featuredImage)
             <img src="{{ $featuredImage }}" alt="" class="mb-10 max-h-[32rem] w-full rounded-3xl object-cover">
         @endif

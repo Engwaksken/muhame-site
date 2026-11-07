@@ -17,16 +17,16 @@
 @section('content')
     @unless ($startsWithHero)
         <header class="bg-brand-soft">
-            <div @class(['mx-auto grid max-w-7xl items-center gap-8 px-5 py-10 sm:px-8 sm:py-14', 'lg:grid-cols-2' => $heroImage])>
+            <div @class(['mx-auto grid max-w-7xl items-center gap-6 px-5 py-6 sm:px-8 sm:py-8', 'lg:grid-cols-2' => $heroImage])>
                 <div>
                     @if ($page->parent)
-                        <nav aria-label="Breadcrumb" class="mb-4 text-sm font-semibold">
+                        <nav aria-label="Breadcrumb" class="mb-3 text-sm font-semibold">
                             <a href="{{ $page->parent->url() }}" class="text-brand-dark">{{ $page->parent->title }}</a>
                         </nav>
                     @endif
                     <h1 class="text-4xl font-bold leading-tight tracking-tight text-stone-950 sm:text-5xl">{{ $page->title }}</h1>
                     @if ($page->excerpt)
-                        <p class="mt-5 max-w-2xl text-lg leading-8 text-stone-700 sm:text-xl">{{ $page->excerpt }}</p>
+                        <p class="mt-4 max-w-2xl text-lg leading-8 text-stone-700 sm:text-xl">{{ $page->excerpt }}</p>
                     @endif
                 </div>
                 @if ($heroImage)
@@ -40,7 +40,7 @@
         @include($block['view'], ['data' => $block['data'], 'blockIndex' => $loop->index])
     @empty
         @if ($safeBody !== '')
-            <div class="mx-auto max-w-3xl px-5 py-10 sm:px-8 sm:py-14">
+            <div class="mx-auto max-w-3xl px-5 py-6 sm:px-8 sm:py-8">
                 <div class="rich-content text-lg leading-8 text-stone-700">{!! $safeBody !!}</div>
             </div>
         @endif

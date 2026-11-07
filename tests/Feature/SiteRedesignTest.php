@@ -239,6 +239,26 @@ class SiteRedesignTest extends TestCase
         $this->get('/services')->assertOk()->assertSee('Talk to us');
     }
 
+    public function test_text_section_can_be_saved_without_a_heading_or_content(): void
+    {
+        $this->seed();
+        $this->actingAs(User::factory()->create()->assignRole('Admin'));
+
+        Livewire::test(CreatePage::class)
+            ->fillForm([
+                'title' => 'Blank section page',
+                'slug' => 'blank-section-page',
+                'status' => 'published',
+                'blocks' => [
+                    ['type' => 'text', 'data' => ['layout' => 'standard']],
+                ],
+            ])
+            ->call('create')
+            ->assertHasNoFormErrors();
+
+        $this->assertDatabaseHas('pages', ['slug' => 'blank-section-page', 'status' => 'published']);
+    }
+
     public function test_events_and_subscribers_admin_access_follows_roles(): void
     {
         $this->seed();

@@ -149,7 +149,7 @@ class SiteSettingResource extends Resource
                             ->schema(self::menuItemFields(withChildren: true))
                             ->columns(2)->collapsible()->cloneable()
                             ->itemLabel(fn (array $state): ?string => $state['label'] ?? null)
-                            ->addActionLabel('Add menu item')->reorderable()->columnSpanFull()
+                            ->addActionLabel('Add menu item')->reorderable()->reorderableWithButtons()->columnSpanFull()
                             ->helperText('Build the top menu here. Add an item, then add dropdown items under it for a sub-menu. If this is empty, pages marked "Show in site menu" are used automatically.'),
                         Section::make('Fallback menu links')->collapsed()
                             ->description('Used only when the main menu above is empty.')
@@ -172,10 +172,10 @@ class SiteSettingResource extends Resource
                                     ->schema(self::menuItemFields())
                                     ->columns(2)->collapsible()->cloneable()
                                     ->itemLabel(fn (array $state): ?string => $state['label'] ?? null)
-                                    ->addActionLabel('Add link')->maxItems(20)->columnSpanFull(),
+                                    ->addActionLabel('Add link')->maxItems(20)->reorderableWithButtons()->columnSpanFull(),
                             ])->collapsible()->cloneable()
                             ->itemLabel(fn (array $state): ?string => $state['title'] ?? null)
-                            ->addActionLabel('Add footer column')->maxItems(4)->columnSpanFull()
+                            ->addActionLabel('Add footer column')->maxItems(4)->reorderableWithButtons()->columnSpanFull()
                             ->helperText('Each column has an editable title and its own list of page links or custom links.'),
                         Section::make('Fallback footer links')->collapsed()
                             ->description('Used only when no footer columns are set above.')
@@ -242,7 +242,7 @@ class SiteSettingResource extends Resource
                 ->schema(self::menuItemFields())
                 ->columns(2)->collapsible()->cloneable()
                 ->itemLabel(fn (array $state): ?string => $state['label'] ?? null)
-                ->addActionLabel('Add dropdown item')->maxItems(12)->columnSpanFull();
+                ->addActionLabel('Add dropdown item')->maxItems(12)->reorderableWithButtons()->columnSpanFull();
         }
 
         return $fields;

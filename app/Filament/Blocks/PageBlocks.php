@@ -2,8 +2,8 @@
 
 namespace App\Filament\Blocks;
 
-use App\Support\FaIcon;
 use App\Models\Category;
+use App\Support\FaIcon;
 use App\Support\SafeUrl;
 use Closure;
 use Filament\Forms\Components\Builder;
@@ -29,6 +29,7 @@ class PageBlocks
             ->label('Page content')
             ->blocks(self::blocks())
             ->addActionLabel('Add a section')
+            ->reorderableWithButtons()
             ->collapsible()
             ->cloneable()
             ->blockNumbers(false)
@@ -40,7 +41,7 @@ class PageBlocks
     {
         return [
             Block::make('hero')->label(self::label('Hero banner'))->icon(FaIcon::make('fa-wand-magic-sparkles'))->schema([
-                TextInput::make('heading')->required()->maxLength(120),
+                TextInput::make('heading')->maxLength(120),
                 Textarea::make('text')->rows(2)->maxLength(300),
                 self::image('image')->helperText('Wide illustration or photo shown beside the headline. Optional.'),
                 ...self::button(),
@@ -49,12 +50,12 @@ class PageBlocks
             Block::make('text')->label(self::label('Text section'))->icon(FaIcon::make('fa-align-left'))->schema([
                 TextInput::make('heading')->maxLength(150),
                 Select::make('layout')->options(['standard' => 'Standard reading column', 'wide' => 'Wide content', 'centered' => 'Centered content', 'split' => 'Two-column content'])->default('standard'),
-                RichEditor::make('content')->required(),
+                RichEditor::make('content'),
                 ...self::button(),
             ]),
 
             Block::make('image_text')->label(self::label('Image + text'))->icon(FaIcon::make('fa-image'))->schema([
-                TextInput::make('heading')->required()->maxLength(150),
+                TextInput::make('heading')->maxLength(150),
                 RichEditor::make('content'),
                 self::image('image')->required(),
                 Select::make('image_position')->options(['left' => 'Image on the left', 'right' => 'Image on the right'])->default('left')->required(),
@@ -76,7 +77,7 @@ class PageBlocks
                         self::url('url')->label('Link'),
                         TextInput::make('link_label')->maxLength(40)->placeholder('Read more'),
                     ]),
-                ])->minItems(1)->maxItems(12)->defaultItems(3)->collapsible()->itemLabel(fn (array $state) => $state['title'] ?? null),
+                ])->minItems(1)->maxItems(12)->defaultItems(3)->collapsible()->reorderableWithButtons()->itemLabel(fn (array $state) => $state['title'] ?? null),
             ]),
 
             Block::make('stats')->label(self::label('Key statistics'))->icon(FaIcon::make('fa-chart-column'))->schema([
@@ -85,12 +86,12 @@ class PageBlocks
                 Repeater::make('items')->label('Statistics')->schema([
                     TextInput::make('value')->required()->maxLength(20)->placeholder('25,000+'),
                     Textarea::make('label')->required()->rows(2)->maxLength(500)->placeholder('people trained'),
-                ])->columns(2)->minItems(1)->maxItems(4)->defaultItems(3),
+                ])->columns(2)->minItems(1)->maxItems(4)->defaultItems(3)->reorderableWithButtons(),
             ]),
 
             Block::make('methodology_showcase')->label('NeLP methodology showcase')->icon(FaIcon::make('fa-diagram-project'))->schema([
                 TextInput::make('eyebrow')->label('Small label')->default('04 · THE METHODOLOGY')->maxLength(80),
-                TextInput::make('heading')->required()->maxLength(150),
+                TextInput::make('heading')->maxLength(150),
                 Textarea::make('intro')->label('Subtitle')->rows(2)->maxLength(300),
                 TextInput::make('about_heading')->default('ABOUT NeLP®')->maxLength(100),
                 Textarea::make('about_content')->label('About the methodology')->rows(4)->maxLength(1200),
@@ -98,24 +99,24 @@ class PageBlocks
                     TextInput::make('title')->required()->maxLength(120),
                     Textarea::make('text')->rows(2)->maxLength(350),
                     TextInput::make('source')->maxLength(180),
-                ])->columns(1)->minItems(1)->maxItems(4)->defaultItems(4)->collapsible(),
+                ])->columns(1)->minItems(1)->maxItems(4)->defaultItems(4)->collapsible()->reorderableWithButtons(),
                 Repeater::make('experiences')->label('Numbered learning experiences')->schema([
                     TextInput::make('number')->required()->maxLength(4)->placeholder('01'),
                     TextInput::make('title')->required()->maxLength(120),
                     Textarea::make('text')->required()->rows(2)->maxLength(350),
                     TextInput::make('evidence')->maxLength(220),
-                ])->columns(2)->minItems(1)->maxItems(6)->defaultItems(4)->collapsible(),
+                ])->columns(2)->minItems(1)->maxItems(6)->defaultItems(4)->collapsible()->reorderableWithButtons(),
                 Repeater::make('journey')->label('Learner journey steps')->schema([
                     TextInput::make('label')->required()->maxLength(60),
-                ])->columns(2)->minItems(2)->maxItems(8)->defaultItems(6)->collapsible(),
+                ])->columns(2)->minItems(2)->maxItems(8)->defaultItems(6)->collapsible()->reorderableWithButtons(),
                 Textarea::make('journey_note')->label('Text under journey')->rows(2)->maxLength(300),
             ]),
 
             Block::make('learner_journey')->label('Learner journey timeline')->icon(FaIcon::make('fa-route'))->schema([
-                TextInput::make('heading')->default('THE LEARNER JOURNEY')->required()->maxLength(120),
+                TextInput::make('heading')->default('THE LEARNER JOURNEY')->maxLength(120),
                 Repeater::make('steps')->label('Journey steps')->schema([
                     TextInput::make('label')->required()->maxLength(60),
-                ])->columns(2)->minItems(2)->maxItems(8)->defaultItems(6)->collapsible()
+                ])->columns(2)->minItems(2)->maxItems(8)->defaultItems(6)->collapsible()->reorderableWithButtons()
                     ->default([['label' => 'Sign up'], ['label' => 'Get assessed'], ['label' => 'Learn adaptively'], ['label' => 'Get certified'], ['label' => 'Get matched'], ['label' => 'Get placed']]),
                 Textarea::make('note')->label('Supporting text')->rows(2)->maxLength(300),
             ]),
@@ -133,7 +134,7 @@ class PageBlocks
             ]),
 
             Block::make('cta_banner')->label(self::label('Call-to-action banner'))->icon(FaIcon::make('fa-bullhorn'))->schema([
-                TextInput::make('heading')->required()->maxLength(150),
+                TextInput::make('heading')->maxLength(150),
                 Textarea::make('text')->rows(2)->maxLength(300),
                 ...self::button(required: true),
             ]),

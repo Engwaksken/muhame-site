@@ -50,8 +50,8 @@ h1, h2, h3, h4, h5, h6 {
 
 .rich-content > :first-child { margin-top: 0; }
 .rich-content > :last-child { margin-bottom: 0; }
-.rich-content p, .rich-content ul, .rich-content ol, .rich-content blockquote, .rich-content pre { margin-block: 1.25rem; }
-.rich-content h1, .rich-content h2, .rich-content h3, .rich-content h4 { margin-block: 2rem 1rem; font-weight: 700; line-height: 1.2; color: #1c1917; }
+.rich-content p, .rich-content ul, .rich-content ol, .rich-content blockquote, .rich-content pre { margin-block: 1rem; }
+.rich-content h1, .rich-content h2, .rich-content h3, .rich-content h4 { margin-block: 1.5rem .75rem; font-weight: 700; line-height: 1.2; color: #1c1917; }
 .rich-content h1 { font-size: 2rem; }
 .rich-content h2 { font-size: 1.5rem; }
 .rich-content h3 { font-size: 1.25rem; }

@@ -25,16 +25,16 @@
 @section('content')
     {{-- Page header --}}
     <header class="bg-brand-soft">
-        <div class="mx-auto max-w-7xl px-5 py-10 sm:px-8 sm:py-14">
+        <div class="mx-auto max-w-7xl px-5 py-6 sm:px-8 sm:py-8">
             <p class="mb-3 text-sm font-semibold uppercase tracking-[0.18em] text-brand-dark">Get in touch</p>
             <h1 class="text-4xl font-bold tracking-tight text-stone-950 sm:text-5xl">Contact us</h1>
-            <p class="mt-4 max-w-2xl text-lg leading-8 text-stone-700">
+            <p class="mt-3 max-w-2xl text-lg leading-8 text-stone-700">
                 Have a question or an idea for working together? Send us a message and we'll get back to you as soon as we can.
             </p>
         </div>
     </header>
 
-    <section class="mx-auto max-w-7xl px-5 py-10 sm:px-8 sm:py-14">
+    <section class="mx-auto max-w-7xl px-5 py-6 sm:px-8 sm:py-8">
         <div @class(['grid items-start gap-8 lg:gap-12', 'lg:grid-cols-12' => $hasSidebar])>
 
             {{-- Left: message form --}}
