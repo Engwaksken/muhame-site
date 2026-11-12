@@ -1,6 +1,6 @@
-# eHub Site
+# eHub Academy Site
 
-The Muhame website and content management system, built with Laravel 13 and Filament 5.
+The eHub Academy landing page and content management system, built with Laravel 13 and Filament 5.
 
 - **Public site:** a block-built homepage, insights (`/insights`), categories, tags, events (`/events`), search, `sitemap.xml` and `robots.txt`
 - **Page builder:** pages are built from sections (hero, text, image + text, cards, statistics, latest insights, upcoming events, call-to-action banner, newsletter signup). Mark one page as the homepage. Nest pages under a parent to build the menu's dropdowns.
