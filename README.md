@@ -1,4 +1,4 @@
-# Muhame Site
+# eHub Site
 
 The Muhame website and content management system, built with Laravel 13 and Filament 5.
 
